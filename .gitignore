@@ -56,5 +56,5 @@ coverage/
 # Netlify
 .netlify
 
-# Audio local con derechos (Persona 3 - Atlus/Sega, solo maquina local, nunca commit)
-public/assets/audio/persona/
+# Audio publicado por decision expresa del dueno (asume riesgo de derechos)
+# public/assets/audio/persona/ se publica en el deploy

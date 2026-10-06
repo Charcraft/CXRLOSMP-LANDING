@@ -274,6 +274,50 @@ if (!prefersReducedMotion && !shouldSkipWebGL()) {
 const deviceTier = getDeviceTier();
 document.documentElement.dataset.deviceTier = deviceTier;
 
+// --- Fondo sticky con parallax leve: solo desktop, sin reduced-motion y tier distinto de low ---
+// Movil (<=768px o hover none), low o reduced-motion: imagen estatica sin movimiento.
+try {
+  const fondoStage = document.getElementById('fondo-stage');
+  const fondoImg = document.getElementById('fondo-img') as HTMLElement | null;
+  const staticFondo = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(hover: none)').matches;
+  if (fondoStage && fondoImg && !prefersReducedMotion && !staticFondo && deviceTier !== 'low' && !shouldSkipWebGL(deviceTier)) {
+    let ticking = false;
+    let lastY = -1;
+    const render = (): void => {
+      ticking = false;
+      const rect = fondoStage.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
+      const progress = Math.max(0, Math.min(1, -rect.top / Math.max(1, rect.height - window.innerHeight)));
+      const y = Math.round(progress * 90);
+      if (y !== lastY) {
+        lastY = y;
+        fondoImg.style.transform = `translateY(${y}px) scale(1.08)`;
+      }
+    };
+    const onScroll = (): void => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(render);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    let resizeT: number | undefined;
+    window.addEventListener('resize', () => {
+      if (resizeT !== undefined) clearTimeout(resizeT);
+      resizeT = window.setTimeout(() => {
+        lastY = -1;
+        render();
+      }, 150);
+    });
+    fondoImg.style.transform = 'translateY(0px) scale(1.08)';
+    render();
+  } else if (fondoImg) {
+    fondoImg.style.transform = 'none';
+  }
+} catch {
+  /* fondo decorativo: nunca rompe */
+}
+
 // Dueno unico del menu movil: main.ts (.nav-toggle + #nav-menu).
 // P3Menu no se monta: segundo sistema eliminado (doble overlay, doble toggle y sonidos invalidos).
 

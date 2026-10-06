@@ -846,3 +846,57 @@ header[role="banner"] {
     overflow: visible;
   }
 }
+
+/* Fondo fijo tipo sticky (hero + about + skills): la imagen queda a
+   pantalla completa y el contenido baja sobre ella. Parallax leve por JS
+   solo en desktop sin reduced-motion y tier distinto de low. */
+.fondo-stage {
+  position: relative;
+}
+.fondo-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  margin-bottom: -100vh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+  z-index: 0;
+}
+.fondo-pic,
+.fondo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.fondo-img {
+  object-fit: cover;
+  object-position: center;
+  transform: translateY(0);
+  will-change: transform;
+}
+.fondo-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 5, 10, 0.74) 0%, rgba(5, 5, 10, 0.52) 38%, rgba(5, 5, 10, 0.66) 68%, rgba(5, 5, 10, 0.86) 100%);
+}
+.fondo-content {
+  position: relative;
+  z-index: 1;
+}
+/* Secciones sobre el fondo: transparentes para que se vea la imagen.
+   Las tarjetas conservan su propio fondo para legibilidad. */
+.fondo-stage #hero {
+  background: transparent;
+}
+.fondo-stage #about,
+.fondo-stage #skills {
+  background-color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fondo-img {
+    transform: none !important;
+    will-change: auto;
+  }
+}

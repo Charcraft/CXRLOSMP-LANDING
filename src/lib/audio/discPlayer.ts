@@ -13,10 +13,21 @@ let enabled = true;
 let unlocked = false;
 let reduced = false;
 
-// Override local (gitignorado, solo maquina del dueno):
+// Override publicado (decision expresa del dueno):
 // public/assets/audio/persona/disco1.mp3 .. disco5.mp3.
 // Si existe, suena ese; si no, el loop original discN.mp3 del deploy.
-// Nunca copiar mp3 con derechos al repo publico.
+export const DISC_TRACKS: readonly string[] = [
+  'Burn My Dread',
+  'Peace',
+  "When The Moon's Reaching Out Stars",
+  'Iwatodai Dorm',
+  'Mass Destruction',
+];
+
+export function getTrackTitle(index: number): string {
+  const i = Math.max(0, Math.min(DISC_TRACKS.length - 1, Math.floor(index)));
+  return DISC_TRACKS[i] ?? `Disco ${i + 1}`;
+}
 const overrideCache = new Map<number, boolean>();
 let requestId = 0;
 

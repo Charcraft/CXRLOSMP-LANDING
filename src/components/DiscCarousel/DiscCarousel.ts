@@ -1,4 +1,4 @@
-import { playDisc, stopAll } from '../../lib/audio/discPlayer.js';
+import { playDisc, stopAll, getTrackTitle } from '../../lib/audio/discPlayer.js';
 
 interface ProjectData {
   title: string;
@@ -63,6 +63,8 @@ function ensureStyles(): void {
     .vd-desc { font-size: 1.075rem; line-height: 1.65; max-width: 52ch; margin: 0 0 1.4rem; color: rgba(255,255,255,.86);
       overflow: visible; overflow-wrap: break-word; display: block; max-height: none; }
     .vd-stack { font-size: .95rem; letter-spacing: .04em; color: #A0A0B0; margin: 0 0 2rem; overflow-wrap: anywhere; max-width: 100%; }
+    .vd-song { font-size: .9rem; letter-spacing: .08em; color: #F2E852; margin: 0 0 1rem; text-transform: uppercase; overflow-wrap: anywhere; }
+    .vd-song span { color: #FFFFFF; }
     .vd-code { display: inline-flex; align-items: center; justify-content: center; border: 2px solid #D92323; color: #D92323;
       padding: .7rem 1.9rem; font-size: .9rem; letter-spacing: .18em; text-decoration: none; text-transform: uppercase;
       transition: background-color .25s ease, color .25s ease; background: transparent; }
@@ -192,12 +194,14 @@ export class DiscCarousel {
 
   private infoHTML(project: ProjectData, index: number): string {
     const stack = (project.tech || []).join(' · ');
+    const track = getTrackTitle(index);
     const code = this.isRealRepo(project.repo)
       ? `<a class="vd-code btn-p5" href="${this.escape(project.repo)}" target="_blank" rel="noopener noreferrer"><span>CÓDIGO</span></a>`
       : '';
     return `
       <span class="vd-kicker">Proyecto ${this.pad(index + 1)}</span>
       <h3 class="vd-title" tabindex="-1">${this.escape(project.title)}</h3>
+      <p class="vd-song" data-vd-song>Suena: <span>${this.escape(track)}</span></p>
       <p class="vd-desc">${this.escape(project.description)}</p>
       <p class="vd-stack">${this.escape(stack)}${project.year ? ` — ${this.escape(project.year)}` : ''}</p>
       ${code}
@@ -250,8 +254,8 @@ export class DiscCarousel {
             </div>
           </div>
           <div>
-            <p class="vd-sr" aria-live="polite" data-vd-live>Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}</p>
-            <article class="vd-info card-p5" role="group" aria-roledescription="slide" aria-label="Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}">
+            <p class="vd-sr" aria-live="polite" data-vd-live>Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}. Suena: ${this.escape(getTrackTitle(this.currentIndex))}</p>
+            <article class="vd-info card-p5" role="group" aria-roledescription="slide" aria-label="Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}. Suena: ${this.escape(getTrackTitle(this.currentIndex))}">
               ${this.infoHTML(project, this.currentIndex)}
             </article>
           </div>
@@ -333,12 +337,12 @@ export class DiscCarousel {
       else dot.removeAttribute('aria-current');
     });
     if (this.liveEl) {
-      this.liveEl.textContent = `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}`;
+      this.liveEl.textContent = `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}. Suena: ${getTrackTitle(index)}`;
     }
     this.updateSlots();
     playDisc(index);
     if (!this.infoEl) return;
-    this.infoEl.setAttribute('aria-label', `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}`);
+    this.infoEl.setAttribute('aria-label', `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}. Suena: ${getTrackTitle(index)}`);
     const swap = (): void => {
       if (!this.infoEl) return;
       this.infoEl.innerHTML = this.infoHTML(project, index);
