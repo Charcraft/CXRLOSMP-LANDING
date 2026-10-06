@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://charcraft.github.io/CXRLOSMP-LANDING/sitemap.xml
+Sitemap: https://cxrlosmp-landing.vercel.app/sitemap.xml

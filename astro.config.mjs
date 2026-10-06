@@ -2,8 +2,8 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://charcraft.github.io',
-  base: '/CXRLOSMP-LANDING/',
+  site: 'https://cxrlosmp-landing.vercel.app',
+  base: '/',
   output: 'static',
   trailingSlash: 'never',
   build: {

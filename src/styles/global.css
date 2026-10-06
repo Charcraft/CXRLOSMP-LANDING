@@ -450,7 +450,8 @@
   #hero .hero-sub,
   #hero .hero-title,
   #hero .hero-desc,
-  #hero .hero-cta-wrap {
+  #hero .hero-cta-wrap,
+  #hero .hero-photo {
     animation-fill-mode: forwards;
   }
 
@@ -461,7 +462,8 @@
   #hero .hero-sub,
   #hero .hero-title,
   #hero .hero-desc,
-  #hero .hero-cta-wrap {
+  #hero .hero-cta-wrap,
+  #hero .hero-photo {
     animation-name: fadeSlideUp, heroSafetyIn;
     animation-duration: 0.8s, 0.01ms;
     animation-delay: 0s, 2.5s;
@@ -472,6 +474,7 @@
   #hero .hero-title { animation-delay: 0.1s, 2.5s; }
   #hero .hero-desc { animation-delay: 0.2s, 2.5s; }
   #hero .hero-cta-wrap { animation-delay: 0.3s, 2.5s; }
+  #hero .hero-photo { animation-delay: 0.35s, 2.5s; }
 
   .reduce-motion .animate-fade-slide-up,
   .reduce-motion .animate-fade-slide-up-delay-1,
@@ -484,6 +487,7 @@
   .reduce-motion #hero .hero-title,
   .reduce-motion #hero .hero-desc,
   .reduce-motion #hero .hero-cta-wrap,
+  .reduce-motion #hero .hero-photo,
   .reduce-motion .animate-float-slow,
   .reduce-motion .animate-pulse-glow,
   .reduce-motion .animate-gradient-shift,
@@ -795,7 +799,8 @@ header[role="banner"] {
   #hero .hero-sub,
   #hero .hero-title,
   #hero .hero-desc,
-  #hero .hero-cta-wrap {
+  #hero .hero-cta-wrap,
+  #hero .hero-photo {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -847,9 +852,10 @@ header[role="banner"] {
   }
 }
 
-/* Bandas sticky con imagen de fondo: la imagen queda a pantalla completa
-   y el contenido baja sobre ella. Mismo patron para las 3 bandas.
-   Parallax leve por JS solo en desktop sin reduced-motion y tier != low. */
+/* Bandas sticky con paneo a la inversa: la imagen mide 130vh, arranca
+   mostrando su parte de arriba y al bajar el scroll la vista desciende
+   por la imagen (translateY 0 hacia negativo). JS solo en desktop
+   sin reduced-motion y tier != low; movil/low estatico. */
 .fondo-stage {
   position: relative;
 }
@@ -863,15 +869,19 @@ header[role="banner"] {
   overflow: hidden;
   z-index: 0;
 }
-.fondo-pic,
+.fondo-pic {
+  display: block;
+  width: 100%;
+  height: 130vh;
+  height: 130svh;
+}
 .fondo-img {
   display: block;
   width: 100%;
-  height: 100%;
-}
-.fondo-img {
+  height: 130vh;
+  height: 130svh;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
   transform: translateY(0);
   will-change: transform;
 }
@@ -890,14 +900,14 @@ header[role="banner"] {
   position: relative;
   z-index: 1;
 }
-/* Hero fuera de bandas: sin imagen, solo canvas Three.js + fondo CSS propio. */
-#hero {
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(217, 35, 35, 0.08) 0%, transparent 70%),
-    linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 55%, #0a0a0f 100%);
+/* Hero dentro de fondo1: transparente para ver la imagen, canvas Three.js encima. */
+.fondo-stage #hero {
+  background: transparent;
+  background-color: transparent;
 }
 /* Secciones sobre bandas: transparentes para ver la imagen.
-   Las tarjetas conservan su fondo para legibilidad. */
+   Las tarjetas conservan su fondo para legibilidad.
+   Todas las secciones quedan con fondo con imagen, sin excepcion. */
 .fondo-stage #about,
 .fondo-stage #skills,
 .fondo-stage #projects,
@@ -907,6 +917,10 @@ header[role="banner"] {
 .fondo-stage #contact {
   background: transparent;
   background-color: transparent;
+}
+.fondo-stage #contact {
+  position: relative;
+  z-index: 2;
 }
 @media (prefers-reduced-motion: reduce) {
   .fondo-img {

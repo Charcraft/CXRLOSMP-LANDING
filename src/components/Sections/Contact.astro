@@ -56,13 +56,13 @@ const cvHref = base?.endsWith('/') ? `${base}CV-Carlos-Martinez.pdf` : `${base}/
 <script type="application/ld+json" set:html={JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Person",
-  "@id": "https://charcraft.github.io/CXRLOSMP-LANDING#person",
+  "@id": "https://cxrlosmp-landing.vercel.app#person",
   "name": profile?.name ?? "Carlos de Jesús Martínez Pineda",
   "givenName": profile?.firstName ?? "Carlos",
   "jobTitle": profile?.title ?? "Estudiante Ingeniería en Software",
   "email": email,
   "address": { "@type": "PostalAddress", "addressLocality": "Chiapas", "addressCountry": "MX" },
-  "url": "https://charcraft.github.io/CXRLOSMP-LANDING",
+  "url": "https://cxrlosmp-landing.vercel.app",
   "sameAs": [github, profile?.social?.youtube, profile?.social?.instagram].filter(Boolean)
 })} />
 <style>

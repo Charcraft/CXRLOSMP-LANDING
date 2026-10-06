@@ -274,8 +274,9 @@ if (!prefersReducedMotion && !shouldSkipWebGL()) {
 const deviceTier = getDeviceTier();
 document.documentElement.dataset.deviceTier = deviceTier;
 
-// --- Bandas sticky con parallax leve: mismo patron en las 3 bandas ---
-// Solo desktop, sin reduced-motion y tier distinto de low.
+// --- Bandas sticky con paneo a la inversa: imagen de 130vh, arranca arriba ---
+// Al bajar el scroll la vista desciende por la imagen (0 hacia negativo).
+// Al subir vuelve hacia arriba. Mismo rAF con throttle, solo desktop.
 // Movil (<=768px o hover none), low o reduced-motion: imagenes estaticas.
 try {
   const stages = Array.from(document.querySelectorAll('.fondo-stage')) as HTMLElement[];
@@ -290,15 +291,18 @@ try {
     const render = (): void => {
       ticking = false;
       for (const stage of stages) {
+        const pin = stage.querySelector('.fondo-pin') as HTMLElement | null;
         const img = stage.querySelector('.fondo-img') as HTMLElement | null;
         if (!img) continue;
         const rect = stage.getBoundingClientRect();
         if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
         const progress = Math.max(0, Math.min(1, -rect.top / Math.max(1, rect.height - window.innerHeight)));
-        const y = Math.round(progress * 90);
+        const pinH = pin ? pin.clientHeight : window.innerHeight;
+        const travel = Math.max(0, (img as HTMLElement).offsetHeight - pinH || Math.round(window.innerHeight * 0.3));
+        const y = Math.round(-progress * travel);
         if (lastY.get(img) !== y) {
           lastY.set(img, y);
-          img.style.transform = `translateY(${y}px) scale(1.08)`;
+          img.style.transform = `translateY(${y}px)`;
         }
       }
     };
@@ -317,7 +321,7 @@ try {
         render();
       }, 150);
     });
-    for (const img of imgs) img.style.transform = 'translateY(0px) scale(1.08)';
+    for (const img of imgs) img.style.transform = 'translateY(0px)';
     render();
   } else {
     for (const img of imgs) img.style.transform = 'none';

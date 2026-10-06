@@ -14,7 +14,7 @@ const skills = (await import('../content/profile.json')).default.skills;
 const projects = await getCollection('projects');
 
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-const siteUrl = 'https://charcraft.github.io/CXRLOSMP-LANDING';
+const siteUrl = 'https://cxrlosmp-landing.vercel.app';
 const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
 ---
 
@@ -44,6 +44,7 @@ const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
   <link rel="apple-touch-icon" href={`${base}assets/images/letra-c.png`}>
   <link rel="manifest" href={`${base}manifest.json`}>
   <link rel="preload" href={`${base}fonts/PressStart2P-Regular.ttf`} as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href={`${base}assets/images/fondo1.webp`} as="image" type="image/webp" fetchpriority="high">
 
   <title>Carlos de Jesús Martínez Pineda | Ingeniería en Software</title>
   <style>
@@ -98,17 +99,16 @@ const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
   <div class="nav-overlay fixed inset-0 bg-fusion-bg/60 z-40 opacity-0 transition-opacity duration-300" id="nav-overlay" hidden style="top: var(--header-h);"></div>
 
   <main id="main">
-    <Hero profile={profile} />
-
     <div class="fondo-stage" data-band="fondo1">
       <div class="fondo-pin" aria-hidden="true">
         <picture class="fondo-pic">
           <source srcset={`${base}assets/images/fondo1.webp`} type="image/webp" />
-          <img class="fondo-img" src={`${base}assets/images/fondo1.jpg`} alt="" decoding="async" loading="eager" fetchpriority="low" />
+          <img class="fondo-img" src={`${base}assets/images/fondo1.jpg`} alt="" decoding="async" loading="eager" fetchpriority="high" />
         </picture>
         <div class="fondo-shade" aria-hidden="true"></div>
       </div>
       <div class="fondo-content">
+        <Hero profile={profile} />
         <About profile={profile} />
         <Skills skills={skills} />
       </div>
