@@ -847,9 +847,9 @@ header[role="banner"] {
   }
 }
 
-/* Fondo fijo tipo sticky (hero + about + skills): la imagen queda a
-   pantalla completa y el contenido baja sobre ella. Parallax leve por JS
-   solo en desktop sin reduced-motion y tier distinto de low. */
+/* Bandas sticky con imagen de fondo: la imagen queda a pantalla completa
+   y el contenido baja sobre ella. Mismo patron para las 3 bandas.
+   Parallax leve por JS solo en desktop sin reduced-motion y tier != low. */
 .fondo-stage {
   position: relative;
 }
@@ -881,17 +881,31 @@ header[role="banner"] {
   background:
     linear-gradient(180deg, rgba(5, 5, 10, 0.74) 0%, rgba(5, 5, 10, 0.52) 38%, rgba(5, 5, 10, 0.66) 68%, rgba(5, 5, 10, 0.86) 100%);
 }
+/* Banda 2 (estampado rojo intenso): degradado oscuro fuerte para legibilidad. */
+.fondo-shade--strong {
+  background:
+    linear-gradient(180deg, rgba(5, 5, 10, 0.9) 0%, rgba(5, 5, 10, 0.8) 35%, rgba(5, 5, 10, 0.84) 65%, rgba(5, 5, 10, 0.93) 100%);
+}
 .fondo-content {
   position: relative;
   z-index: 1;
 }
-/* Secciones sobre el fondo: transparentes para que se vea la imagen.
-   Las tarjetas conservan su propio fondo para legibilidad. */
-.fondo-stage #hero {
-  background: transparent;
+/* Hero fuera de bandas: sin imagen, solo canvas Three.js + fondo CSS propio. */
+#hero {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(217, 35, 35, 0.08) 0%, transparent 70%),
+    linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 55%, #0a0a0f 100%);
 }
+/* Secciones sobre bandas: transparentes para ver la imagen.
+   Las tarjetas conservan su fondo para legibilidad. */
 .fondo-stage #about,
-.fondo-stage #skills {
+.fondo-stage #skills,
+.fondo-stage #projects,
+.fondo-stage #ai-formacion,
+.fondo-stage #experience,
+.fondo-stage #stats,
+.fondo-stage #contact {
+  background: transparent;
   background-color: transparent;
 }
 @media (prefers-reduced-motion: reduce) {

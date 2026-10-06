@@ -44,7 +44,6 @@ const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
   <link rel="apple-touch-icon" href={`${base}assets/images/letra-c.png`}>
   <link rel="manifest" href={`${base}manifest.json`}>
   <link rel="preload" href={`${base}fonts/PressStart2P-Regular.ttf`} as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href={`${base}assets/images/fondo.webp`} as="image" type="image/webp" fetchpriority="high">
 
   <title>Carlos de Jesús Martínez Pineda | Ingeniería en Software</title>
   <style>
@@ -99,77 +98,100 @@ const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
   <div class="nav-overlay fixed inset-0 bg-fusion-bg/60 z-40 opacity-0 transition-opacity duration-300" id="nav-overlay" hidden style="top: var(--header-h);"></div>
 
   <main id="main">
-    <div id="fondo-stage" class="fondo-stage">
+    <Hero profile={profile} />
+
+    <div class="fondo-stage" data-band="fondo1">
       <div class="fondo-pin" aria-hidden="true">
         <picture class="fondo-pic">
-          <source srcset={`${base}assets/images/fondo.webp`} type="image/webp" />
-          <img id="fondo-img" class="fondo-img" src={`${base}assets/images/fondo.jpg`} alt="" decoding="async" fetchpriority="high" />
+          <source srcset={`${base}assets/images/fondo1.webp`} type="image/webp" />
+          <img class="fondo-img" src={`${base}assets/images/fondo1.jpg`} alt="" decoding="async" loading="eager" fetchpriority="low" />
         </picture>
         <div class="fondo-shade" aria-hidden="true"></div>
       </div>
       <div class="fondo-content">
-        <Hero profile={profile} />
         <About profile={profile} />
         <Skills skills={skills} />
       </div>
     </div>
 
-    <section id="projects" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="projects-title" style="scroll-margin-top: var(--header-h);">
-      <div class="max-w-7xl mx-auto">
-        <h2 id="projects-title" class="section-title text-center">
-          Proyectos <span>Destacados</span>
-        </h2>
-
-        <div class="flex justify-center mb-6">
-          <button id="disc-music-toggle" type="button" class="btn-p5" aria-pressed="true">
-            <span data-disc-music-label>Musica ON</span>
-          </button>
-        </div>
-
-        <div id="disc-carousel" class="w-full">
-          <div class="projects-fallback grid md:grid-cols-2 gap-6">
-            <article class="card-p5 p-6">
-              <p class="badge-p5 text-xs mb-3">2026</p>
-              <h3 class="font-display text-xl text-fusion-text-primary mb-2">BotPublicador IA</h3>
-              <p class="text-fusion-text-muted mb-4">App en Streamlit con 6 bots sociales y publicación real en página de Facebook.</p>
-              <p class="text-fusion-text-muted text-sm mb-4">Python · Streamlit · Ollama · Facebook Graph API</p>
-            </article>
-            <article class="card-p5 p-6">
-              <p class="badge-p5 text-xs mb-3">2026</p>
-              <h3 class="font-display text-xl text-fusion-text-primary mb-2">LandingPageAct</h3>
-              <p class="text-fusion-text-muted mb-4">Landing page activa en HTML, CSS y JavaScript, actualizada en octubre de 2026.</p>
-              <p class="text-fusion-text-muted text-sm mb-4">HTML5 · CSS3 · JavaScript</p>
-              <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/LandingPageAct" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
-            </article>
-            <article class="card-p5 p-6">
-              <p class="badge-p5 text-xs mb-3">2025</p>
-              <h3 class="font-display text-xl text-fusion-text-primary mb-2">App Distribuciones de Probabilidad</h3>
-              <p class="text-fusion-text-muted mb-4">Herramienta en Python para calcular distribuciones de probabilidad y prueba de hipótesis sin tablas manuales.</p>
-              <p class="text-fusion-text-muted text-sm mb-4">Python</p>
-              <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/DPPHapp" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
-            </article>
-            <article class="card-p5 p-6">
-              <p class="badge-p5 text-xs mb-3">2025</p>
-              <h3 class="font-display text-xl text-fusion-text-primary mb-2">Consejo de Enfermeria</h3>
-              <p class="text-fusion-text-muted mb-4">Sitio estático en HTML con información y orientación de enfermería.</p>
-              <p class="text-fusion-text-muted text-sm mb-4">HTML</p>
-            </article>
-            <article class="card-p5 p-6 md:col-span-2">
-              <p class="badge-p5 text-xs mb-3">2025</p>
-              <h3 class="font-display text-xl text-fusion-text-primary mb-2">decoOne</h3>
-              <p class="text-fusion-text-muted mb-4">Proyecto integrador en JavaScript con interfaz web para catálogo decorativo.</p>
-              <p class="text-fusion-text-muted text-sm mb-4">JavaScript · HTML5 · CSS3</p>
-            </article>
-          </div>
-        </div>
+    <div class="fondo-stage" data-band="fondo2">
+      <div class="fondo-pin" aria-hidden="true">
+        <picture class="fondo-pic">
+          <source srcset={`${base}assets/images/fondo2.webp`} type="image/webp" />
+          <img class="fondo-img" src={`${base}assets/images/fondo2.jpg`} alt="" decoding="async" loading="lazy" fetchpriority="low" />
+        </picture>
+        <div class="fondo-shade fondo-shade--strong" aria-hidden="true"></div>
       </div>
-    </section>
+      <div class="fondo-content">
+        <section id="projects" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="projects-title" style="scroll-margin-top: var(--header-h);">
+          <div class="max-w-7xl mx-auto">
+            <h2 id="projects-title" class="section-title text-center">
+              Proyectos <span>Destacados</span>
+            </h2>
 
-    <AISection />
+            <div class="flex justify-center mb-6">
+              <button id="disc-music-toggle" type="button" class="btn-p5" aria-pressed="true">
+                <span data-disc-music-label>Musica ON</span>
+              </button>
+            </div>
 
-    <Experience />
-    <Stats profile={profile} />
-    <Contact profile={profile} />
+            <div id="disc-carousel" class="w-full">
+              <div class="projects-fallback grid md:grid-cols-2 gap-6">
+                <article class="card-p5 p-6">
+                  <p class="badge-p5 text-xs mb-3">2026</p>
+                  <h3 class="font-display text-xl text-fusion-text-primary mb-2">BotPublicador IA</h3>
+                  <p class="text-fusion-text-muted mb-4">App en Streamlit con 6 bots sociales y publicación real en página de Facebook.</p>
+                  <p class="text-fusion-text-muted text-sm mb-4">Python · Streamlit · Ollama · Facebook Graph API</p>
+                </article>
+                <article class="card-p5 p-6">
+                  <p class="badge-p5 text-xs mb-3">2026</p>
+                  <h3 class="font-display text-xl text-fusion-text-primary mb-2">LandingPageAct</h3>
+                  <p class="text-fusion-text-muted mb-4">Landing page activa en HTML, CSS y JavaScript, actualizada en octubre de 2026.</p>
+                  <p class="text-fusion-text-muted text-sm mb-4">HTML5 · CSS3 · JavaScript</p>
+                  <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/LandingPageAct" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
+                </article>
+                <article class="card-p5 p-6">
+                  <p class="badge-p5 text-xs mb-3">2025</p>
+                  <h3 class="font-display text-xl text-fusion-text-primary mb-2">App Distribuciones de Probabilidad</h3>
+                  <p class="text-fusion-text-muted mb-4">Herramienta en Python para calcular distribuciones de probabilidad y prueba de hipótesis sin tablas manuales.</p>
+                  <p class="text-fusion-text-muted text-sm mb-4">Python</p>
+                  <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/DPPHapp" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
+                </article>
+                <article class="card-p5 p-6">
+                  <p class="badge-p5 text-xs mb-3">2025</p>
+                  <h3 class="font-display text-xl text-fusion-text-primary mb-2">Consejo de Enfermeria</h3>
+                  <p class="text-fusion-text-muted mb-4">Sitio estático en HTML con información y orientación de enfermería.</p>
+                  <p class="text-fusion-text-muted text-sm mb-4">HTML</p>
+                </article>
+                <article class="card-p5 p-6 md:col-span-2">
+                  <p class="badge-p5 text-xs mb-3">2025</p>
+                  <h3 class="font-display text-xl text-fusion-text-primary mb-2">decoOne</h3>
+                  <p class="text-fusion-text-muted mb-4">Proyecto integrador en JavaScript con interfaz web para catálogo decorativo.</p>
+                  <p class="text-fusion-text-muted text-sm mb-4">JavaScript · HTML5 · CSS3</p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <AISection />
+      </div>
+    </div>
+
+    <div class="fondo-stage" data-band="fondo3">
+      <div class="fondo-pin" aria-hidden="true">
+        <picture class="fondo-pic">
+          <source srcset={`${base}assets/images/fondo3.webp`} type="image/webp" />
+          <img class="fondo-img" src={`${base}assets/images/fondo3.jpg`} alt="" decoding="async" loading="lazy" fetchpriority="low" />
+        </picture>
+        <div class="fondo-shade" aria-hidden="true"></div>
+      </div>
+      <div class="fondo-content">
+        <Experience />
+        <Stats profile={profile} />
+        <Contact profile={profile} />
+      </div>
+    </div>
   </main>
 
   <footer class="py-8 px-4 border-t border-p5-red-dim/30" role="contentinfo">

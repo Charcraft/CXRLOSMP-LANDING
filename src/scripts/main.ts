@@ -274,24 +274,32 @@ if (!prefersReducedMotion && !shouldSkipWebGL()) {
 const deviceTier = getDeviceTier();
 document.documentElement.dataset.deviceTier = deviceTier;
 
-// --- Fondo sticky con parallax leve: solo desktop, sin reduced-motion y tier distinto de low ---
-// Movil (<=768px o hover none), low o reduced-motion: imagen estatica sin movimiento.
+// --- Bandas sticky con parallax leve: mismo patron en las 3 bandas ---
+// Solo desktop, sin reduced-motion y tier distinto de low.
+// Movil (<=768px o hover none), low o reduced-motion: imagenes estaticas.
 try {
-  const fondoStage = document.getElementById('fondo-stage');
-  const fondoImg = document.getElementById('fondo-img') as HTMLElement | null;
-  const staticFondo = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(hover: none)').matches;
-  if (fondoStage && fondoImg && !prefersReducedMotion && !staticFondo && deviceTier !== 'low' && !shouldSkipWebGL(deviceTier)) {
+  const stages = Array.from(document.querySelectorAll('.fondo-stage')) as HTMLElement[];
+  const imgs = stages
+    .map((stage) => stage.querySelector('.fondo-img') as HTMLElement | null)
+    .filter((el): el is HTMLElement => el !== null);
+  const staticBand = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(hover: none)').matches;
+  const parallaxOff = prefersReducedMotion || staticBand || deviceTier === 'low' || shouldSkipWebGL(deviceTier);
+  if (!parallaxOff && stages.length > 0 && imgs.length > 0) {
     let ticking = false;
-    let lastY = -1;
+    const lastY = new Map<HTMLElement, number>();
     const render = (): void => {
       ticking = false;
-      const rect = fondoStage.getBoundingClientRect();
-      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
-      const progress = Math.max(0, Math.min(1, -rect.top / Math.max(1, rect.height - window.innerHeight)));
-      const y = Math.round(progress * 90);
-      if (y !== lastY) {
-        lastY = y;
-        fondoImg.style.transform = `translateY(${y}px) scale(1.08)`;
+      for (const stage of stages) {
+        const img = stage.querySelector('.fondo-img') as HTMLElement | null;
+        if (!img) continue;
+        const rect = stage.getBoundingClientRect();
+        if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+        const progress = Math.max(0, Math.min(1, -rect.top / Math.max(1, rect.height - window.innerHeight)));
+        const y = Math.round(progress * 90);
+        if (lastY.get(img) !== y) {
+          lastY.set(img, y);
+          img.style.transform = `translateY(${y}px) scale(1.08)`;
+        }
       }
     };
     const onScroll = (): void => {
@@ -305,17 +313,17 @@ try {
     window.addEventListener('resize', () => {
       if (resizeT !== undefined) clearTimeout(resizeT);
       resizeT = window.setTimeout(() => {
-        lastY = -1;
+        lastY.clear();
         render();
       }, 150);
     });
-    fondoImg.style.transform = 'translateY(0px) scale(1.08)';
+    for (const img of imgs) img.style.transform = 'translateY(0px) scale(1.08)';
     render();
-  } else if (fondoImg) {
-    fondoImg.style.transform = 'none';
+  } else {
+    for (const img of imgs) img.style.transform = 'none';
   }
 } catch {
-  /* fondo decorativo: nunca rompe */
+  /* fondos decorativos: nunca rompen */
 }
 
 // Dueno unico del menu movil: main.ts (.nav-toggle + #nav-menu).
