@@ -3,12 +3,14 @@ interface Props {
   profile: any;
 }
 const { profile } = Astro.props;
+const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden" aria-labelledby="hero-title" style="scroll-margin-top: var(--header-h);">
-  <!-- Three.js Canvas -->
-  <canvas id="hero-canvas" class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
-  
+  <!-- Three.js Canvas: detalle de fondo, contenido siempre encima -->
+  <canvas id="hero-canvas" class="absolute inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
+
   <!-- Scanlines & Vignette overlays -->
   <div class="scanlines" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
@@ -16,19 +18,27 @@ const { profile } = Astro.props;
   <!-- Hero Content -->
   <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
     <div class="text-center">
-      <p class="hero-sub font-display text-xs md:text-sm uppercase tracking-widest text-p5-red mb-4 opacity-0 animate-fade-slide-up">
-        Hola, soy {profile.name.split(' ')[1]} de Jesus
+      <p class="hero-sub reveal font-display text-xs md:text-sm uppercase tracking-widest text-p5-red mb-4">
+        Hola, soy {firstName} — estudio Ingeniería en Software en Chiapas
       </p>
-      <h1 id="hero-title" class="hero-title font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl uppercase leading-tight tracking-wider text-gradient-fusion mb-6 opacity-0 animate-fade-slide-up-delay-1">
-        {profile.name}.<br>
-        <span class="text-gradient-fusion-reverse">{profile.tagline}</span>
+      <h1 id="hero-title" class="hero-title reveal font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl uppercase leading-tight tracking-wider text-gradient-fusion mb-6">
+        Construyo webs rápidas<br />
+        <span class="text-gradient-fusion-reverse">que convierten</span>
       </h1>
-      <p class="hero-desc text-fusion-text-muted text-base md:text-lg max-w-2xl mx-auto mb-10 opacity-0 animate-fade-slide-up-delay-2">
-        {profile.bio}
+      <p class="hero-desc reveal text-fusion-text-muted text-base md:text-lg max-w-2xl mx-auto mb-10">
+        Hago landings que cargan en segundos y apps en Python que ahorran horas de trabajo manual.
       </p>
-      <a href="#projects" class="hero-cta btn-p5 inline-flex opacity-0 animate-fade-slide-up-delay-3">
-        <span>Ver mis proyectos</span>
-      </a>
+      <div class="hero-cta-wrap reveal flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#projects" class="hero-cta btn-p5 inline-flex">
+          <span>Ver mis proyectos</span>
+        </a>
+        <a href="#contact" class="hero-cta btn-p3 inline-flex">
+          <span>Contáctame</span>
+        </a>
+        <a href={`${base}CV-Carlos-Martinez.pdf`} download="CV-Carlos-Martinez.pdf" class="hero-cta btn-p3 inline-flex">
+          <span>Descargar CV</span>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -38,34 +48,111 @@ const { profile } = Astro.props;
       <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
     </svg>
   </div>
+  <noscript><style>.hero-sub,.hero-title,.hero-desc,.hero-cta-wrap,.reveal,.animate-fade-slide-up,.animate-fade-slide-up-delay-1,.animate-fade-slide-up-delay-2,.animate-fade-slide-up-delay-3{opacity:1!important;transform:none!important;animation:none!important}</style></noscript>
 
-  <!-- Three.js Initialization -->
+  <!-- Reveal sin GSAP: IntersectionObserver anade .is-visible. Fallback: visible a los 2.5s por CSS -->
   <script type="module">
-    import { TokyoScene } from '../../lib/three/TokyoScene.js';
-    import { getDeviceTier } from '../../lib/responsive.js';
-
-    const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
-    if (canvas) {
-      const deviceTier = getDeviceTier();
-      const scene = new TokyoScene(canvas);
-      await scene.init(deviceTier);
-      scene.start();
-
-      // Scroll progress for distortion
-      let ticking = false;
-      window.addEventListener('scroll', () => {
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(() => {
-            const progress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-            scene.setScrollProgress(Math.max(0, Math.min(1, progress)));
-            ticking = false;
-          });
+    const heroEls = document.querySelectorAll('#hero .reveal');
+    const showAll = () => heroEls.forEach((el) => el.classList.add('is-visible'));
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            io.unobserve(e.target);
+          }
         }
-      });
+      }, { threshold: 0.1 });
+      heroEls.forEach((el) => io.observe(el));
+      // Seguridad: si el observer no dispara, mostrar igual
+      setTimeout(showAll, 2500);
+    } else {
+      showAll();
+    }
+  </script>
 
-      // Cleanup on page unload
-      window.addEventListener('beforeunload', () => scene.dispose());
+  <!-- Three.js lazy: dynamic import + IntersectionObserver, dpr max 1.5, respeta reduce-motion -->
+  <script type="module">
+    const canvas = document.getElementById('hero-canvas');
+    const heroSection = document.getElementById('hero');
+    if (!canvas || !heroSection) { /* sin canvas no hay escena */ }
+    else if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // Reduce motion: no cargamos WebGL, queda fondo CSS legible
+      canvas.style.display = 'none';
+    } else {
+      let loaded = false;
+      const loadScene = async () => {
+        if (loaded) return;
+        loaded = true;
+        try {
+          const [{ TokyoScene }, { getDeviceTier }] = await Promise.all([
+            import('../../lib/three/TokyoScene.js'),
+            import('../../lib/responsive.js'),
+          ]);
+          const deviceTier = getDeviceTier();
+          const scene = new TokyoScene(canvas);
+          await scene.init(deviceTier);
+          // Cap DPR a 1.5 para LCP/performancia (TokyoScene usa min(dpr,2) por defecto)
+          try {
+            const r = scene.renderer ?? scene._renderer ?? null;
+            if (r && typeof r.setPixelRatio === 'function') {
+              r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+            }
+          } catch (_) { /* noop */ }
+          scene.start();
+
+          // Pausa Three off-screen (perf): start/stop según visibilidad del hero
+          if ('IntersectionObserver' in window) {
+            const visIO = new IntersectionObserver((entries) => {
+              for (const entry of entries) {
+                if (entry.isIntersecting) scene.start();
+                else scene.stop();
+              }
+            }, { threshold: 0 });
+            visIO.observe(heroSection);
+            const cleanup = () => { try { visIO.disconnect(); } catch (_) {} try { scene.dispose(); } catch (_) {} };
+            window.addEventListener('beforeunload', cleanup);
+            window.addEventListener('pagehide', cleanup);
+          } else {
+            window.addEventListener('beforeunload', () => { try { scene.dispose(); } catch (_) {} });
+          }
+
+          let ticking = false;
+          window.addEventListener('scroll', () => {
+            if (!ticking) {
+              ticking = true;
+              requestAnimationFrame(() => {
+                const progress = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+                scene.setScrollProgress(Math.max(0, Math.min(1, progress)));
+                ticking = false;
+              });
+            }
+          }, { passive: true });
+        } catch (err) {
+          console.warn('[hero] WebGL omitido:', err);
+          canvas.style.display = 'none';
+        }
+      };
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              // Pequeño defer para no bloquear LCP
+              if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => loadScene(), { timeout: 1500 });
+              } else {
+                setTimeout(loadScene, 300);
+              }
+              io.disconnect();
+              break;
+            }
+          }
+        }, { rootMargin: '200px' });
+        io.observe(heroSection);
+      } else {
+        setTimeout(loadScene, 500);
+      }
     }
   </script>
 </section>

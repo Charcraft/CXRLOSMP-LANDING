@@ -7,16 +7,26 @@ interface SoundMap {
   close: string;
   click: string;
   hover: string;
+  back: string;
 }
 
+const BASE = (() => {
+  try {
+    const b = import.meta.env.BASE_URL || '/';
+    return b.endsWith('/') ? b : `${b}/`;
+  } catch {
+    return '/';
+  }
+})();
+
 const SOUND_MAP: SoundMap = {
-  navigate: '/audio/navigate.ogg',
-  confirm: '/audio/confirm.ogg',
-  open: '/audio/open.ogg',
-  close: '/audio/close.ogg',
-  click: '/audio/click.ogg',
-  hover: '/audio/hover.ogg',
-  back: '/audio/back.ogg',
+  navigate: `${BASE}assets/audio/hover.wav`,
+  confirm: `${BASE}assets/audio/click.wav`,
+  open: `${BASE}assets/audio/click.wav`,
+  close: `${BASE}assets/audio/click.wav`,
+  click: `${BASE}assets/audio/click.wav`,
+  hover: `${BASE}assets/audio/hover.wav`,
+  back: `${BASE}assets/audio/hover.wav`,
 };
 
 export class AudioManager {
@@ -24,9 +34,10 @@ export class AudioManager {
   private buffers: Map<SoundType, AudioBuffer> = new Map();
   private isLoaded: boolean = false;
   private isMuted: boolean = false;
-  private volume: number = 0.3;
+  private volume: number = 0.25;
   private reducedMotion: boolean = false;
   private hasInteracted: boolean = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -52,13 +63,17 @@ export class AudioManager {
 
   async init() {
     if (this.reducedMotion) return;
+    if (this.initPromise) return this.initPromise;
 
-    try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      await this.loadAllSounds();
-    } catch (e) {
-      console.warn('Audio initialization failed:', e);
-    }
+    this.initPromise = (async () => {
+      try {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        await this.loadAllSounds();
+      } catch (e) {
+        console.warn('Audio initialization failed:', e);
+      }
+    })();
+    return this.initPromise;
   }
 
   private async loadAllSounds() {

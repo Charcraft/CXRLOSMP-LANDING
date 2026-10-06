@@ -3,6 +3,16 @@ interface Props {
   skills: any[];
 }
 const { skills } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+const fallbackPng: Record<string, string> = {
+  HTML5: 'html-5.png',
+  CSS3: 'css-3.png',
+  JavaScript: 'js.png',
+  Python: 'python.png',
+  Java: 'java.png',
+  'C++': 'c++logo.png',
+  MySQL: 'mysql.png',
+};
 ---
 
 <section id="skills" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8 bg-fusion-bg-secondary/30" aria-labelledby="skills-title" style="scroll-margin-top: var(--header-h);">
@@ -11,14 +21,18 @@ const { skills } = Astro.props;
       Skills <span>Técnicos</span>
     </h2>
     
-    <div class="skills-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4" role="list">
-      {skills.map((skill) => `
-        <button class="skill-tag group" role="listitem" aria-label={skill.name}>
-          <img src="/assets/images/{skill.icon}" alt="" width="24" height="24" loading="lazy" decoding="async" class="group-hover:scale-110 transition-transform duration-300">
+    <ul class="skills-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 list-none p-0 m-0">
+      {skills.map((skill) => {
+        const svg = `${base}assets/icons/${skill.icon}`;
+        const png = `${base}assets/images/${fallbackPng[skill.name] ?? String(skill.icon).replace(/\.svg$/i, '.png')}`;
+        return (
+        <li class="skill-tag group">
+          <img src={svg} alt={skill.name} width="24" height="24" loading="lazy" decoding="async" class="group-hover:scale-110 transition-transform duration-300" onerror={`if(!this.dataset.fbk){this.dataset.fbk='1';this.src='${png}'}else{this.remove()}`} />
           <span>{skill.name}</span>
-        </button>
-      `)}
-    </div>
+        </li>
+        );
+      })}
+    </ul>
   </div>
 </section>
 

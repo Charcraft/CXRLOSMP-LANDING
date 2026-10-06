@@ -1,25 +1,27 @@
-/* Font Face Declarations - Self-hosted fonts */
-/* 
-  Download these fonts and place in public/fonts/:
-  - Pixelated MS Gothic (or Press Start 2P as fallback)
-  - Noto Sans JP Variable (wght 300-700)
-  - JetBrains Mono Variable (wght 400-600)
-*/
+/* Font Face Declarations - Self-hosted fonts (archivos reales en public/fonts/) */
 
 @font-face {
   font-family: 'Pixelated MS Gothic';
-  src: url('/fonts/PixelatedMS-Gothic.woff2') format('woff2'),
-       url('/fonts/PixelatedMS-Gothic.woff') format('woff');
+  src: url('/CXRLOSMP-LANDING/fonts/PressStart2P-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+0180-024F, U+2500-25FF, U+3000-30FF, U+31F0-31FF, U+FF00-FFEF;
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+0180-024F, U+2500-25FF;
 }
 
 @font-face {
   font-family: 'Noto Sans JP';
-  src: url('/fonts/NotoSansJP-Variable.woff2') format('woff2-variations');
-  font-weight: 300 700;
+  src: url('/CXRLOSMP-LANDING/fonts/NotoSansJP-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007F, U+00A0-00FF, U+3040-309F, U+30A0-30FF, U+4E00-9FFF, U+FF00-FFEF;
+}
+
+@font-face {
+  font-family: 'Noto Sans JP';
+  src: url('/CXRLOSMP-LANDING/fonts/NotoSansJP-Bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
   unicode-range: U+0020-007F, U+00A0-00FF, U+3040-309F, U+30A0-30FF, U+4E00-9FFF, U+FF00-FFEF;
@@ -27,12 +29,9 @@
 
 @font-face {
   font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
-  font-weight: 400 600;
+  src: url('/CXRLOSMP-LANDING/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
   unicode-range: U+0020-007F, U+00A0-00FF;
 }
-
-/* Fallback to Google Fonts if self-hosted not available */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');

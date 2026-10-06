@@ -1,31 +1,41 @@
 {
-  "name": "Carlos de Jesus Martinez Pineda",
+  "name": "Carlos de Jesús Martínez Pineda",
+  "firstName": "Carlos",
   "title": "Estudiante Ingeniería en Software",
   "tagline": "Build. Scale. Optimize.",
-  "email": "carlosmartinezpineda.dev@gmail.com",
+    "email": "charcraftycarlos@gmail.com",
   "location": "Chiapas, México",
-  "bio": "Estudiante de Ingeniería en Software especializado en crear aplicaciones web robustas, eficientes y centradas en el usuario. Me apasiona resolver problemas complejos mediante código limpio y buenas prácticas de arquitectura.",
-  "bioLong": "Soy Carlos de Jesus Martinez Pineda, estudiante de Ingeniería en Software en Chiapas, México. Mi enfoque principal es el desarrollo Full Stack con énfasis en rendimiento, escalabilidad y experiencia de usuario. Me apasiona escribir código limpio, aplicar patrones de arquitectura y optimizar Core Web Vitals. Tengo experiencia con tecnologías modernas de frontend y backend, bases de datos relacionales y no relacionales, y metodologías ágiles.",
+  "bio": "Estudiante de Ingeniería en Software en Chiapas. Hago landings con HTML, CSS y JavaScript, y herramientas en Python. Busco prácticas o trabajo remoto.",
+  "bioLong": "Soy Carlos de Jesús Martínez Pineda, estudiante de Ingeniería en Software en Chiapas, México. Aprendo desarrollo web con HTML, CSS y JavaScript, y programación en Python. Tengo 2 proyectos hechos, 3 certificaciones de Cisco Networking Academy y respondo en 24h. Mi inglés está en aprendizaje.",
   "stats": {
     "location": "Chiapas, México",
-    "email": "carlosmartinezpineda.dev@gmail.com",
+  "email": "charcraftycarlos@gmail.com",
     "education": "Ingeniería en Software",
     "focus": "Full Stack & Performance"
   },
   "skills": [
-    { "name": "HTML5", "icon": "hmtl-5.png" },
-    { "name": "CSS3", "icon": "css-3.png" },
-    { "name": "JavaScript", "icon": "js.png" },
-    { "name": "Python", "icon": "python.png" },
-    { "name": "Java", "icon": "java.png" },
-    { "name": "C++", "icon": "c++logo.png" },
-    { "name": "MySQL", "icon": "mysql.png" }
+    { "name": "HTML5", "icon": "html5.svg" },
+    { "name": "CSS3", "icon": "css3.svg" },
+    { "name": "JavaScript", "icon": "javascript.svg" },
+    { "name": "Python", "icon": "python.svg" },
+    { "name": "Java", "icon": "java.svg" },
+    { "name": "C++", "icon": "cplusplus.svg" },
+    { "name": "MySQL", "icon": "mysql.svg" }
   ],
   "social": {
     "github": "https://github.com/Charcraft",
+    "linkedin": null,
     "instagram": "https://www.instagram.com/cjezp/?hl=es",
     "youtube": "https://www.youtube.com/@charcraftt",
     "facebook": "https://www.facebook.com/profile.php?id=61593109829929",
     "tiktok": null
-  }
+  },
+  "availability": "Disponible remoto / Chiapas",
+  "languages": ["Español (nativo)", "Inglés (en aprendizaje)"],
+  "metrics": [
+    { "value": "1", "label": "Año estudiando" },
+    { "value": "2", "label": "Proyectos hechos" },
+    { "value": "3", "label": "Certificaciones Cisco" },
+    { "value": "24h", "label": "Tiempo de respuesta" }
+  ]
 }

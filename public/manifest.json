@@ -3,19 +3,21 @@
   "short_name": "CXRLOSMP",
   "description": "Portfolio de Carlos de Jesus Martinez Pineda - Estudiante Ingeniería en Software | Build. Scale. Optimize.",
   "start_url": "/CXRLOSMP-LANDING/",
+  "scope": "/CXRLOSMP-LANDING/",
+  "id": "/CXRLOSMP-LANDING/",
   "display": "standalone",
   "background_color": "#0D0D0D",
   "theme_color": "#D92323",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/assets/images/letra-c.png",
+      "src": "/CXRLOSMP-LANDING/assets/images/letra-c.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/images/letra-c.png",
+      "src": "/CXRLOSMP-LANDING/assets/images/letra-c.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -28,14 +30,14 @@
       "short_name": "Proyectos",
       "description": "Ver mis proyectos destacados",
       "url": "/CXRLOSMP-LANDING/#projects",
-      "icons": [{ "src": "/assets/images/letra-c.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/CXRLOSMP-LANDING/assets/images/letra-c.png", "sizes": "192x192" }]
     },
     {
       "name": "Contacto",
       "short_name": "Contacto",
       "description": "Conectar conmigo",
       "url": "/CXRLOSMP-LANDING/#contact",
-      "icons": [{ "src": "/assets/images/letra-c.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/CXRLOSMP-LANDING/assets/images/letra-c.png", "sizes": "192x192" }]
     }
   ]
 }

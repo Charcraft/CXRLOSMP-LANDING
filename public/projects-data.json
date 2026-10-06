@@ -1,20 +1,54 @@
 [
   {
-    "title": "Landing Page Blog Personal",
-    "description": "Diseño e implementación de una landing page para un blog personal, con diseño responsive y optimización para mejorar los tiempos de carga.",
-    "tech": ["HTML5", "CSS3", "JavaScript"],
-    "year": "2025",
-    "pattern": "vinyl",
-    "primaryHue": 45,
-    "secondaryHue": 220
+    "title": "BotPublicador IA",
+    "description": "App en Streamlit con 6 bots sociales y publicación real en página de Facebook.",
+    "tech": ["Python", "Streamlit", "Ollama", "Facebook Graph API"],
+    "year": "2026",
+    "pattern": "circuit",
+    "primaryHue": 160,
+    "secondaryHue": 220,
+    "featured": true
   },
   {
-    "title": "App Distribuciones de Probabilidad y Prueba de Hipótesis",
-    "description": "Aplicación para análisis estadístico de distribuciones de probabilidad y realización de pruebas de hipótesis, utilizando el teorema de Bayes.",
-    "tech": ["Python", "NumPy", "Pandas"],
+    "title": "LandingPageAct",
+    "description": "Landing page activa en HTML, CSS y JavaScript, actualizada en octubre de 2026.",
+    "tech": ["HTML5", "CSS3", "JavaScript"],
+    "year": "2026",
+    "pattern": "vinyl",
+    "primaryHue": 45,
+    "secondaryHue": 220,
+    "featured": true,
+    "repo": "https://github.com/Charcraft/LandingPageAct"
+  },
+  {
+    "title": "App Distribuciones de Probabilidad",
+    "description": "Herramienta en Python para calcular distribuciones de probabilidad y prueba de hipótesis sin tablas manuales.",
+    "tech": ["Python"],
     "year": "2025",
     "pattern": "data",
     "primaryHue": 30,
-    "secondaryHue": 220
+    "secondaryHue": 220,
+    "featured": true,
+    "repo": "https://github.com/Charcraft/DPPHapp"
+  },
+  {
+    "title": "Consejo de Enfermeria",
+    "description": "Sitio estático en HTML con información y orientación de enfermería.",
+    "tech": ["HTML"],
+    "year": "2025",
+    "pattern": "circuit",
+    "primaryHue": 200,
+    "secondaryHue": 160,
+    "featured": false
+  },
+  {
+    "title": "decoOne",
+    "description": "Proyecto integrador en JavaScript con interfaz web para catálogo decorativo.",
+    "tech": ["JavaScript", "HTML5", "CSS3"],
+    "year": "2025",
+    "pattern": "neon",
+    "primaryHue": 280,
+    "secondaryHue": 220,
+    "featured": false
   }
 ]

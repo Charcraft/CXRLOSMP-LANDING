@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { tokyoVertex } from './shaders.js';
-import { tokyoFragment } from './tokyoFragment.js';
+// Shaders solo via dynamic import en createBackgroundShader() (chunk lazy, no bloquea LCP)
 
 export class ParticleField {
   private count: number;
@@ -71,14 +70,33 @@ export class ParticleField {
     this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
+    // Sprite circular: evita cuadrados planos (PointsMaterial sin mapa dibuja cuadrados)
+    const sprite = (() => {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 64;
+      const ctx = c.getContext('2d')!;
+      const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.4, 'rgba(255,255,255,0.8)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 64);
+      const tex = new THREE.CanvasTexture(c);
+      tex.needsUpdate = true;
+      return tex;
+    })();
+
     this.material = new THREE.PointsMaterial({
-      size: 1.5,
+      size: 0.9,
+      map: sprite,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       sizeAttenuation: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
+      alphaTest: 0.01,
     });
 
     this.mesh = new THREE.Points(this.geometry, this.material);
@@ -157,7 +175,7 @@ export class BuildingField {
     this.material = new THREE.MeshBasicMaterial({
       color: 0x0A0A0F,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.85,
       depthWrite: true,
     });
 
@@ -169,15 +187,16 @@ export class BuildingField {
     const color = new THREE.Color();
 
     for (let i = 0; i < this.count; i++) {
-      const width = 2 + Math.random() * 6;
-      const height = 10 + Math.random() * 50;
-      const depth = 2 + Math.random() * 6;
+      // Edificios siempre delante de la camara (z entre -80 y -15), nunca alrededor
+      const width = 2 + Math.random() * 5;
+      const height = 8 + Math.random() * 22;
+      const depth = 2 + Math.random() * 5;
 
       dummy.scale.set(width, height, depth);
       
-      const x = (Math.random() - 0.5) * 120;
-      const z = (Math.random() - 0.5) * 120 - 30;
-      dummy.position.set(x, height / 2 - 5, z);
+      const x = (Math.random() - 0.5) * 140;
+      const z = -15 - Math.random() * 65;
+      dummy.position.set(x, height / 2 - 8, z);
       dummy.rotation.y = Math.random() * Math.PI * 0.2;
       dummy.updateMatrix();
 
@@ -230,6 +249,7 @@ export class TokyoScene {
   private deviceTier: 'low' | 'medium' | 'high' = 'high';
   private resizeHandler: () => void;
   private mouseMoveHandler: (e: MouseEvent) => void;
+  private rafId: number = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -238,11 +258,36 @@ export class TokyoScene {
     this.mouseMoveHandler = this.onMouseMove.bind(this);
   }
 
+  private getDprCap(): number {
+    return this.deviceTier === 'low' ? 1 : this.deviceTier === 'medium' ? 1.5 : 2;
+  }
+
+  private shouldSkipRender(): boolean {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+    try {
+      const conn = (navigator as any).connection;
+      if (conn && (conn.saveData === true || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) return true;
+    } catch {
+      /* sin Network Information API */
+    }
+    return this.deviceTier === 'low';
+  }
+
   async init(deviceTier: 'low' | 'medium' | 'high' = 'high') {
     this.deviceTier = deviceTier;
 
+    // Low tier / save-data / reduced-motion: sin WebGL, queda el fondo CSS estatico del hero
+    if (this.shouldSkipRender()) {
+      try {
+        this.canvas.style.display = 'none';
+      } catch {
+        /* noop */
+      }
+      return;
+    }
+
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0x0A0A0F, 50, 200);
+    this.scene.fog = new THREE.Fog(0x0A0A0F, 60, 180);
 
     this.camera = new THREE.PerspectiveCamera(
       60,
@@ -250,18 +295,19 @@ export class TokyoScene {
       0.1,
       300
     );
-    this.camera.position.set(0, 5, 30);
-    this.camera.lookAt(0, 0, 0);
+    // Camara fuera de la geometria: mira al horizonte desde lejos
+    this.camera.position.set(0, 10, 70);
+    this.camera.lookAt(0, 5, 0);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true,
+      antialias: this.deviceTier === 'high',
       alpha: true,
-      powerPreference: 'high-performance',
+      powerPreference: this.deviceTier === 'low' ? 'low-power' : 'high-performance',
       preserveDrawingBuffer: false,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.getDprCap()));
     this.renderer.setClearColor(0x0A0A0F, 1);
     this.renderer.physicallyCorrectLights = true;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -271,8 +317,8 @@ export class TokyoScene {
     // Create shader material for background
     await this.createBackgroundShader();
 
-    // Initialize particle field
-    const particleCount = this.deviceTier === 'high' ? 2000 : (this.deviceTier === 'medium' ? 1000 : 300);
+    // Particulas por tier: 300 low / 800 mid / 2000 high
+    const particleCount = this.deviceTier === 'high' ? 2000 : (this.deviceTier === 'medium' ? 800 : 300);
     this.particleField = new ParticleField(particleCount);
     this.scene.add(this.particleField.getMesh());
 
@@ -338,7 +384,7 @@ export class TokyoScene {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.getDprCap()));
 
     if (this.shaderMaterial) {
       this.shaderMaterial.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
@@ -352,6 +398,9 @@ export class TokyoScene {
 
   start() {
     if (this.isRunning) return;
+    // Sin render en low tier, save-data o reduced-motion (el hero queda con fondo CSS)
+    if (this.shouldSkipRender()) return;
+    if (!this.isInitialized) return;
     this.isRunning = true;
     this.clock.start();
     this.animate();
@@ -359,12 +408,16 @@ export class TokyoScene {
 
   stop() {
     this.isRunning = false;
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = 0;
+    }
   }
 
   private animate = () => {
     if (!this.isRunning) return;
 
-    requestAnimationFrame(this.animate);
+    this.rafId = requestAnimationFrame(this.animate);
 
     const delta = this.clock.getDelta();
 
@@ -383,10 +436,12 @@ export class TokyoScene {
       this.shaderMaterial.uniforms.uScrollProgress.value = this.scrollProgress;
     }
 
-    // Subtle camera movement
-    this.camera.position.x += (this.mouseX * 3 - this.camera.position.x) * 0.02;
-    this.camera.position.y += (this.mouseY * 2 - this.camera.position.y) * 0.02;
-    this.camera.lookAt(this.mouseX * 0.5, this.mouseY * 0.5, 0);
+    // Movimiento sutil alrededor de la posicion base (no hunde la camara)
+    const baseX = 0;
+    const baseY = 10;
+    this.camera.position.x += (baseX + this.mouseX * 3 - this.camera.position.x) * 0.02;
+    this.camera.position.y += (baseY + this.mouseY * 2 - this.camera.position.y) * 0.02;
+    this.camera.lookAt(this.mouseX * 0.5, 5 + this.mouseY * 0.5, 0);
 
     this.renderer.render(this.scene, this.camera);
   };

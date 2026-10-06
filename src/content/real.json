@@ -1,0 +1,112 @@
+{
+  "email": "charcraftycarlos@gmail.com",
+  "tools": [
+    { "name": "git", "level": "intermedio", "source": "pc", "icon": "git.svg" },
+    { "name": "GitHub", "level": "intermedio", "source": "repo", "icon": "github.svg" },
+    { "name": "VS Code", "level": "intermedio", "source": "pc", "icon": "vscode.svg" },
+    { "name": "Cursor", "level": "base", "source": "pc", "icon": "vscode.svg" },
+    { "name": "Node.js", "level": "base", "source": "pc", "icon": "nodejs.svg" },
+    { "name": "npm", "level": "base", "source": "pc", "icon": "nodejs.svg" },
+    { "name": "Python", "level": "intermedio", "source": "pc", "icon": "python.svg" },
+    { "name": "pip", "level": "base", "source": "pc", "icon": "python.svg" },
+    { "name": "Java", "level": "base", "source": "curso", "icon": "java.svg" },
+    { "name": "Streamlit", "level": "intermedio", "source": "repo", "icon": "streamlit.svg" },
+    { "name": "Ollama", "level": "intermedio", "source": "pc", "icon": "ollama.svg" },
+    { "name": "Astro", "level": "base", "source": "repo", "icon": "astro.svg" },
+    { "name": "Tailwind", "level": "base", "source": "repo", "icon": "tailwindcss.svg" },
+    { "name": "MySQL", "level": "base", "source": "curso", "icon": "mysql.svg" },
+    { "name": "C++", "level": "base", "source": "curso", "icon": "cplusplus.svg" },
+    { "name": "HTML5", "level": "intermedio", "source": "repo", "icon": "html5.svg" },
+    { "name": "CSS3", "level": "intermedio", "source": "repo", "icon": "css3.svg" },
+    { "name": "JavaScript", "level": "base", "source": "repo", "icon": "javascript.svg" }
+  ],
+  "aiWork": {
+    "descripcion": "Soy Carlos: construyo bots que publican de verdad y contenido generado con IA. Mi BotPublicador parte de una idea y publica en 6 redes, y mi contenido NIAVA une voz, imagen y video creados con IA.",
+    "stack": ["Python", "Streamlit", "Ollama", "Gemini", "OpenAI", "HuggingFace", "Facebook Graph API"],
+    "hitos": [
+      "Construí mi BotPublicador con Streamlit y Python: publica en 6 redes desde una idea, con Ollama en local y Gemini, OpenAI y HuggingFace como proveedores",
+      "Logré publicación real en mi página CJEZP con la API Graph de Facebook",
+      "Creé contenido NIAVA con voz, imagen y video generados con IA",
+      "Armé un ChatBot de prueba en Python para experimentar con conversación"
+    ]
+  },
+  "agentJourney": {
+    "linea": "Trabajo a diario con Claude, Gemini, GPT, Cursor, Codex y Antigravity para construir y depurar mis proyectos.",
+    "contextoPersistente": "Guardo contexto persistente en AGENT_CONTEXT para retomar entre sesiones sin perder el hilo.",
+    "debuggingReal": [
+      "Depuré el error 200 de Facebook por usar token de usuario en lugar de token de página, junto a mis agentes",
+      "Corregí el proveedor None en mi BotPublicador por selección no propagada, con ayuda de agentes"
+    ],
+    "orquestadorActual": "Hoy trabajo como orquestador de subagentes: delego frontend, contenido y verificación a agentes especializados."
+  },
+  "projects": [
+    {
+      "title": "BotPublicador IA",
+      "repo": null,
+      "localPath": null,
+      "stack": ["Python", "Streamlit", "Ollama", "Gemini", "OpenAI", "HuggingFace", "Facebook Graph API"],
+      "status": "terminado",
+      "note": "App Streamlit con 6 bots sociales y publicación real en página de Facebook CJEZP. Sin demo pública verificada."
+    },
+    {
+      "title": "App Distribuciones Probabilidad",
+      "repo": "https://github.com/Charcraft/DPPHapp",
+      "localPath": null,
+      "stack": ["Python"],
+      "status": "terminado",
+      "note": "Cálculo de distribuciones y prueba de hipótesis. Repo público DPPHapp. Sin métricas de rendimiento declaradas."
+    },
+    {
+      "title": "LandingPageAct",
+      "repo": "https://github.com/Charcraft/LandingPageAct",
+      "localPath": null,
+      "stack": ["HTML5", "CSS3", "JavaScript"],
+      "status": "en curso",
+      "note": "Repo activo actualizado en octubre de 2026. Sin demo pública verificada."
+    },
+    {
+      "title": "Consejo de Enfermeria",
+      "repo": null,
+      "localPath": null,
+      "stack": ["HTML"],
+      "status": "terminado",
+      "note": "Sitio estático en HTML. Sin repo público verificado ni demo pública."
+    },
+    {
+      "title": "Blog personal",
+      "repo": "https://github.com/Charcraft/Blog",
+      "localPath": null,
+      "stack": ["HTML5", "CSS3", "JavaScript"],
+      "status": "en curso",
+      "note": "Repo Blog en GitHub. Sin demo pública verificada."
+    },
+    {
+      "title": "decoOne",
+      "repo": null,
+      "localPath": "ProyectoIntegrador",
+      "stack": ["JavaScript", "HTML5", "CSS3"],
+      "status": "terminado",
+      "note": "Proyecto integrador en JavaScript. Sin repo público verificado ni demo pública."
+    },
+    {
+      "title": "NIAVA",
+      "repo": null,
+      "localPath": null,
+      "stack": ["IA generativa", "voz", "imagen", "video"],
+      "status": "en curso",
+      "note": "Contenido creado con IA: voz, imagen y video. Sin repo público verificado."
+    },
+    {
+      "title": "ChatBotPrueba",
+      "repo": null,
+      "localPath": null,
+      "stack": ["Python"],
+      "status": "pausado",
+      "note": "Prueba de chatbot en Python. Sin repo público verificado ni demo pública."
+    }
+  ],
+  "formation": {
+    "status": "en curso",
+    "interests": ["desarrollo web", "Python", "bases de datos", "IA aplicada y agentes"]
+  }
+}

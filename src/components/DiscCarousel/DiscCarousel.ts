@@ -1,450 +1,370 @@
-import { DiscRenderer, getDiscPatternFromTech, type DiscSpec } from '../canvas/DiscRenderer.js';
+import { playDisc, stopAll } from '../../lib/audio/discPlayer.js';
 
 interface ProjectData {
   title: string;
   description: string;
   tech: string[];
   year: string;
-  pattern: 'circuit' | 'vinyl' | 'data' | 'neon';
-  primaryHue: number;
-  secondaryHue: number;
+  pattern?: string;
+  primaryHue?: number;
+  secondaryHue?: number;
+  featured?: boolean;
+  repo?: string;
+}
+
+const STYLE_ID = 'vd-carousel-style';
+
+function ensureStyles(): void {
+  if (document.getElementById(STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = `
+    .vd-carousel { position: relative; max-width: 1120px; margin: 0 auto; color: #FFFFFF; }
+    .vd-grain { position: absolute; inset: 0; pointer-events: none; opacity: .07;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); }
+    .vd-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 4vw, 3.5rem); align-items: start; position: relative; }
+    .vd-stage { position: relative; height: 400px; min-width: 0; overflow: hidden; perspective: 1200px; border-radius: 0.75rem; isolation: isolate; }
+    .vd-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .vd-slot { position: absolute; left: 50%; top: 50%; width: min(280px, 60vw); aspect-ratio: 1 / 1;
+      margin-left: calc(min(280px, 60vw) / -2); margin-top: calc(min(280px, 60vw) / -2);
+      transition: transform .55s cubic-bezier(.22,.8,.24,1), opacity .45s ease; transform-style: preserve-3d; }
+    .vd-disc { width: 100%; height: 100%; border-radius: 50%; position: relative; transform-style: preserve-3d;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.14), transparent 42%),
+        repeating-radial-gradient(circle at 50% 50%, #1a1a24 0 2px, #0a0a0f 2px 4px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 42px rgba(217,35,35,.22), inset 0 0 0 1px rgba(255,255,255,.12);
+      border: 1px solid rgba(217,35,35,.38); }
+    .vd-spinner { position: absolute; inset: 0; border-radius: 50%; }
+    .vd-slot.is-on .vd-spinner { animation: vd-spin 26s linear infinite; }
+    @keyframes vd-spin { to { transform: rotate(360deg); } }
+    .vd-grooves { position: absolute; inset: 0; border-radius: 50%;
+      background: repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(255,255,255,.055) 5px 6px); }
+    .vd-label { position: absolute; left: 50%; top: 50%; width: 36%; aspect-ratio: 1 / 1; translate: -50% -50%;
+      border-radius: 50%; background: #0D0D0D; color: #FFFFFF;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem;
+      box-shadow: 0 0 0 3px #D92323, 0 0 0 4px rgba(0,0,0,.4); }
+    .vd-initial { font-weight: 700; font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1; letter-spacing: -.02em; color: #FFFFFF; }
+    .vd-label-year { font-size: .72rem; letter-spacing: .18em; opacity: .75; color: #A0A0B0; }
+    .vd-hole { position: absolute; left: 50%; top: 50%; width: 11px; height: 11px; translate: -50% -50%;
+      border-radius: 50%; background: #0a0a0f; box-shadow: 0 0 0 3px rgba(217,35,35,.35); z-index: 2; }
+    .vd-shine { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+      background: conic-gradient(from 210deg, transparent 0 42%, rgba(255,255,255,.12) 49%, transparent 57% 100%); }
+    .vd-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+      border-top: 1px solid rgba(217,35,35,.32); padding-top: 1.25rem; margin-bottom: 1.5rem; }
+    .vd-count { font-variant-numeric: tabular-nums; letter-spacing: .12em; font-size: .95rem; white-space: nowrap; color: #F2E852; }
+    .vd-count .vd-total { color: rgba(255,255,255,.45); }
+    .vd-year { font-size: .95rem; letter-spacing: .12em; color: #A0A0B0; }
+    .vd-info.swap { opacity: 0; transform: translateY(10px); }
+    .vd-info { opacity: 1; transform: none; transition: opacity .32s ease, transform .32s ease;
+      min-width: 0; max-width: 100%; overflow: visible; padding: 1.75rem; }
+    .vd-kicker { display: block; font-size: .85rem; letter-spacing: .22em; color: #D92323; margin-bottom: 1rem; text-transform: uppercase; }
+    .vd-title { font-size: clamp(1.6rem, 5vw, 3.2rem); line-height: 1.12; letter-spacing: -.015em;
+      margin: 0 0 1.1rem; font-weight: 650; color: #FFFFFF; text-wrap: balance; overflow-wrap: anywhere; max-width: 100%; }
+    .vd-desc { font-size: 1.075rem; line-height: 1.65; max-width: 52ch; margin: 0 0 1.4rem; color: rgba(255,255,255,.86);
+      overflow: visible; overflow-wrap: break-word; display: block; max-height: none; }
+    .vd-stack { font-size: .95rem; letter-spacing: .04em; color: #A0A0B0; margin: 0 0 2rem; overflow-wrap: anywhere; max-width: 100%; }
+    .vd-code { display: inline-flex; align-items: center; justify-content: center; border: 2px solid #D92323; color: #D92323;
+      padding: .7rem 1.9rem; font-size: .9rem; letter-spacing: .18em; text-decoration: none; text-transform: uppercase;
+      transition: background-color .25s ease, color .25s ease; background: transparent; }
+    .vd-code:hover { background: #D92323; color: #0D0D0D; }
+    .vd-code:focus-visible { outline: 2px solid #00B4FF; outline-offset: 3px; }
+    .vd-code.btn-p5 { font-family: inherit; }
+    .vd-controls { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+      border-top: 1px solid rgba(217,35,35,.32); margin-top: 2.25rem; padding-top: 1.5rem; }
+    .vd-arrows { display: flex; gap: .75rem; }
+    .vd-arrow { width: 3rem; height: 3rem; padding: 0; border: 2px solid #D92323; background: transparent;
+      color: #D92323; font-size: 1.2rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      transition: background-color .25s ease, color .25s ease, border-color .25s ease; }
+    .vd-arrow[data-action="prev"]:hover { background: #D92323; color: #0D0D0D; }
+    .vd-arrow[data-action="next"] { border-color: #00B4FF; color: #00B4FF; }
+    .vd-arrow[data-action="next"]:hover { background: #00B4FF; color: #0D0D0D; }
+    .vd-arrow:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+    .vd-dots { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; margin: 0; padding: 0; }
+    .vd-dot { width: .7rem; height: .7rem; border-radius: 50%; border: 1px solid rgba(255,255,255,.5);
+      background: transparent; padding: 0; cursor: pointer; }
+    .vd-dot[aria-current="true"] { background: #F2E852; border-color: #F2E852; }
+    .vd-dot:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+    .vd-empty { border-top: 1px solid rgba(217,35,35,.32); padding: 2rem 0; color: #A0A0B0; }
+    .vd-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (min-width: 1024px) and (max-width: 1440px) {
+      .vd-grid { grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr); gap: 3rem; }
+      .vd-stage { height: 380px; min-width: 320px; }
+      .vd-info { min-width: 320px; }
+    }
+    @media (max-width: 860px) {
+      .vd-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+      .vd-stage { height: 300px; order: -1; }
+      .vd-info { padding: 1.25rem; }
+    }
+    @media (max-width: 430px) {
+      .vd-stage { height: 250px; }
+      .vd-desc { font-size: 1rem; }
+      .vd-controls { gap: .75rem; }
+      .vd-arrow { width: 2.75rem; height: 2.75rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .vd-slot { transition: none; }
+      .vd-slot.is-on .vd-spinner { animation: none; }
+      .vd-info { transition: none; }
+      .vd-info.swap { transform: none; }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 export class DiscCarousel {
   private container: HTMLElement;
-  private discRenderer: DiscRenderer;
   private projects: ProjectData[];
-  private currentIndex: number = 0;
-  private discElements: HTMLElement[] = [];
-  private infoElements: HTMLElement[] = [];
-  private isAnimating: boolean = false;
-  private rotation: number = 0;
-  private targetRotation: number = 0;
-  private animationId: number | null = null;
-  private touchStartX: number = 0;
-  private touchStartRotation: number = 0;
-  private isDragging: boolean = false;
-  private gsap: any;
-
-  constructor(container: HTMLElement, projects: ProjectData[], gsap: any) {
-    this.container = container;
-    this.projects = projects;
-    this.discRenderer = new DiscRenderer();
-    this.gsap = gsap;
-    this.init();
-  }
-
-  private init() {
-    this.renderCarousel();
-    this.bindEvents();
-    this.animate();
-    this.setupGSAP();
-  }
-
-  private renderCarousel() {
-    const carouselHTML = `
-      <div class="disc-carousel relative w-full max-w-5xl mx-auto" role="region" aria-label="Proyectos">
-        <!-- Carousel Viewport -->
-        <div class="carousel-viewport relative perspective-1000" style="height: 400px;">
-          ${this.projects.map((project, index) => this.createDiscElement(project, index)).join('')}
-        </div>
-
-        <!-- Navigation -->
-        <div class="carousel-nav flex justify-center gap-4 mt-8">
-          <button class="nav-btn prev-btn p5-btn" aria-label="Proyecto anterior" disabled>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          <div class="indicators flex items-center gap-2" role="tablist" aria-label="Proyectos">
-            ${this.projects.map((_, i) => `
-              <button class="indicator w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === 0 ? 'bg-p5-gold w-8' : 'bg-p5-red-dim/50'}" 
-                      role="tab" 
-                      aria-selected="${i === 0}" 
-                      aria-label="Ver proyecto ${this.projects[i].title}"
-                      data-index="${i}"></button>
-            `).join('')}
-          </div>
-
-          <button class="nav-btn next-btn p5-btn" aria-label="Siguiente proyecto">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Info Panel -->
-        <div class="disc-info-panel mt-10 p-6 md:p-8 glass-p5 rounded-2xl overflow-hidden">
-          <div class="info-content max-w-3xl mx-auto">
-            ${this.projects.map((project, index) => `
-              <div class="info-item ${index === 0 ? 'active' : ''}" data-index="${index}" style="display: ${index === 0 ? 'block' : 'none'};">
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="badge-p5 text-sm">${project.year}</span>
-                  <span class="font-display text-xs text-p3-pink uppercase">${project.pattern.toUpperCase()} PATTERN</span>
-                </div>
-                <h3 class="font-display text-2xl md:text-3xl text-fusion-text-primary mb-3">${project.title}</h3>
-                <p class="text-fusion-text-muted mb-5 leading-relaxed">${project.description}</p>
-                <div class="flex flex-wrap gap-2 mb-6" role="list" aria-label="Tecnologías">
-                  ${project.tech.map((tech, ti) => `
-                    <span class="badge-p5 text-xs" style="animation-delay: ${ti * 50}ms">${tech}</span>
-                  `).join('')}
-                </div>
-                <div class="flex flex-wrap gap-3">
-                  <a href="#" class="btn-p5" data-project="${project.title}"><span>Ver Detalle</span></a>
-                  <a href="#" class="btn-p3" data-project="${project.title}"><span>GitHub</span></a>
-                  <a href="#" class="btn-p3" data-project="${project.title}"><span>Demo</span></a>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-
-    this.container.innerHTML = carouselHTML;
-    this.cacheElements();
-  }
-
-  private createDiscElement(project: any, index: number): string {
-    const isActive = index === 0;
-    const zIndex = 10 - index;
-    const translateX = (index - 1) * 320; // -320, 0, 320
-    const scale = index === 1 ? 1 : 0.65;
-    const opacity = index === 1 ? 1 : 0.5;
-    const z = index === 1 ? 0 : -150;
-
-    const spec = {
-      title: project.title,
-      year: project.year,
-      primaryHue: project.primaryHue,
-      secondaryHue: project.secondaryHue,
-      pattern: project.pattern,
-    };
-
-    // Generate disc canvas
-    const canvas = this.discRenderer.generateDisc({
-      title: project.title,
-      year: project.year,
-      primaryHue: project.primaryHue,
-      secondaryHue: project.secondaryHue,
-      pattern: project.pattern,
-    }, 280);
-
-    const dataUrl = canvas.toDataURL('image/webp', 0.9);
-
-    return `
-      <div class="disc-card absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer preserve-3d transition-all duration-700 ease-out"
-           style="
-             z-index: ${zIndex};
-             transform: translateX(${translateX}px) translateZ(${z}px) scale(${scale});
-             opacity: ${opacity};
-           "
-           data-index="${index}"
-           data-title="${project.title}"
-           role="button"
-           tabindex="0"
-           aria-label="${project.title} - ${project.year}"
-           aria-selected="${index === 1 ? 'true' : 'false'}">
-        <div class="disc-inner relative w-[var(--disc-size,220px)] h-[var(--disc-size,220px)] preserve-3d">
-          <img src="${dataUrl}" alt="${project.title} disc artwork" 
-               class="absolute inset-0 w-full h-full object-cover pointer-events-none"
-               loading="lazy" decoding="async">
-          <div class="disc-glare absolute inset-0 bg-gradient-to-br from-p5-gold/20 via-transparent to-p3-blue/20 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-        </div>
-        <div class="disc-label absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-center pointer-events-none">
-          <p class="font-display text-xs text-p5-gold uppercase tracking-wider">${project.title}</p>
-          <p class="text-p5-grey-light text-xs">${project.year}</p>
-        </div>
-      </div>
-    `;
-  }
-
-  private cacheElements() {
-    this.discElements = Array.from(this.container.querySelectorAll('.disc-card'));
-    this.infoElements = Array.from(this.container.querySelectorAll('.info-item'));
-  }
-
-  private bindEvents() {
-    // Navigation buttons
-    const prevBtn = this.container.querySelector('.prev-btn');
-    const nextBtn = this.container.querySelector('.next-btn');
-    
-    prevBtn?.addEventListener('click', () => this.navigate(-1));
-    nextBtn?.addEventListener('click', () => this.navigate(1));
-
-    // Indicators
-    this.container.querySelectorAll('.indicator').forEach((indicator, index) => {
-      indicator.addEventListener('click', () => this.goTo(index));
-    });
-
-    // Disc click
-    this.discElements.forEach((disc, index) => {
-      disc.addEventListener('click', () => this.goTo(index));
-      disc.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.goTo(index);
-        }
-      });
-    });
-
-    // Touch/Swipe
-    const viewport = this.container.querySelector('.carousel-viewport');
-    viewport?.addEventListener('pointerdown', this.onPointerDown.bind(this), { passive: true });
-    viewport?.addEventListener('pointermove', this.onPointerMove.bind(this), { passive: false });
-    viewport?.addEventListener('pointerup', this.onPointerUp.bind(this));
-    viewport?.addEventListener('pointerleave', this.onPointerUp.bind(this));
-
-    // Wheel
-    viewport?.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
-
-    // Keyboard
-    document.addEventListener('keydown', this.onKeyDown.bind(this));
-  }
-
-  private onPointerDown(e: PointerEvent) {
-    this.isDragging = true;
-    this.touchStartX = e.clientX;
-    this.touchStartRotation = this.targetRotation;
-    this.cancelAnimation();
-  }
-
-  private onPointerMove(e: PointerEvent) {
-    if (!this.isDragging) return;
-    e.preventDefault();
-    const deltaX = e.clientX - this.touchStartX;
-    this.targetRotation = this.touchStartRotation + deltaX * 0.003;
-  }
-
-  private onPointerUp() {
-    this.isDragging = false;
-    this.snapToNearest();
-  }
-
-  private onWheel(e: WheelEvent) {
-    e.preventDefault();
-    this.targetRotation += e.deltaY * 0.005;
-    this.cancelAnimation();
-  }
-
-  private onKeyDown(e: KeyboardEvent) {
+  private currentIndex = 0;
+  private infoEl: HTMLElement | null = null;
+  private countEl: HTMLElement | null = null;
+  private liveEl: HTMLElement | null = null;
+  private dotsEl: HTMLElement | null = null;
+  private slots: HTMLElement[] = [];
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private swapTimeout: number | undefined = undefined;
+  private onKeyDown = (e: KeyboardEvent): void => {
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       this.navigate(-1);
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
       this.navigate(1);
-    } else if (e.key === 'Escape') {
-      // Close any open detail
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      this.goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      this.goTo(this.projects.length - 1);
+    }
+  };
+  private onPointerDown = (e: PointerEvent): void => {
+    this.touchStartX = e.clientX;
+    this.touchStartY = e.clientY;
+  };
+  private onPointerUp = (e: PointerEvent): void => {
+    const dx = e.clientX - this.touchStartX;
+    const dy = e.clientY - this.touchStartY;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+      this.navigate(dx < 0 ? 1 : -1);
+    }
+  };
+
+  constructor(container: HTMLElement, projects: ProjectData[], _gsap?: unknown) {
+    this.container = container;
+    this.projects = Array.isArray(projects) ? projects : [];
+    ensureStyles();
+    this.render();
+  }
+
+  private isRealRepo(url?: string): url is string {
+    if (!url || typeof url !== 'string') return false;
+    const clean = url.trim();
+    if (clean === '' || clean === '#') return false;
+    try {
+      const u = new URL(clean, window.location.origin);
+      if (u.protocol !== 'https:') return false;
+      if (u.hostname !== 'github.com') return false;
+      const parts = u.pathname.split('/').filter(Boolean);
+      return parts.length >= 2;
+    } catch {
+      return false;
     }
   }
 
-  private cancelAnimation() {
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-      this.animationId = null;
+  private pad(n: number): string {
+    return String(n).padStart(2, '0');
+  }
+
+  private escape(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  private initialOf(title: string): string {
+    const clean = (title || 'C').trim();
+    return (clean.charAt(0) || 'C').toUpperCase();
+  }
+
+  private infoHTML(project: ProjectData, index: number): string {
+    const stack = (project.tech || []).join(' · ');
+    const code = this.isRealRepo(project.repo)
+      ? `<a class="vd-code btn-p5" href="${this.escape(project.repo)}" target="_blank" rel="noopener noreferrer"><span>CÓDIGO</span></a>`
+      : '';
+    return `
+      <span class="vd-kicker">Proyecto ${this.pad(index + 1)}</span>
+      <h3 class="vd-title" tabindex="-1">${this.escape(project.title)}</h3>
+      <p class="vd-desc">${this.escape(project.description)}</p>
+      <p class="vd-stack">${this.escape(stack)}${project.year ? ` — ${this.escape(project.year)}` : ''}</p>
+      ${code}
+    `;
+  }
+
+  private slotTransform(offset: number): { css: string; opacity: string; z: string } {
+    const narrow = typeof window !== 'undefined' && window.innerWidth < 860;
+    const side = narrow ? 40 : 48;
+    if (offset === 0) return { css: 'translateX(0) scale(1) rotateY(0deg)', opacity: '1', z: '3' };
+    if (offset === 1) return { css: `translateX(${side}%) scale(.72) rotateY(-30deg)`, opacity: '.9', z: '2' };
+    if (offset === -1) return { css: `translateX(-${side}%) scale(.72) rotateY(30deg)`, opacity: '.9', z: '2' };
+    return { css: 'translateX(0) scale(.5) rotateY(0deg)', opacity: '0', z: '0' };
+  }
+
+  private render(): void {
+    if (this.projects.length === 0) {
+      this.container.innerHTML = `<div class="vd-carousel"><p class="vd-empty">Proyectos en camino. Vuelve pronto.</p></div>`;
+      return;
     }
+    const project = this.projects[this.currentIndex];
+    const discs = this.projects
+      .map((p, i) => `
+        <div class="vd-slot" data-slot="${i}" aria-hidden="true">
+          <div class="vd-disc">
+            <div class="vd-spinner">
+              <div class="vd-grooves"></div>
+              <div class="vd-label">
+                <span class="vd-initial">${this.escape(this.initialOf(p.title))}</span>
+                <span class="vd-label-year">${this.escape(p.year || '')}</span>
+              </div>
+              <div class="vd-hole"></div>
+            </div>
+            <div class="vd-shine"></div>
+          </div>
+        </div>
+      `)
+      .join('');
+    this.container.innerHTML = `
+      <div class="vd-carousel" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Proyectos">
+        <div class="vd-grain" aria-hidden="true"></div>
+        <div class="vd-meta">
+          <span class="vd-count" aria-hidden="true">${this.pad(this.currentIndex + 1)}<span class="vd-total">/${this.pad(this.projects.length)}</span></span>
+          <span class="vd-year">${this.escape(project.year || '')}</span>
+        </div>
+        <div class="vd-grid">
+          <div class="vd-stage">
+            <div class="vd-track">
+              ${discs}
+            </div>
+          </div>
+          <div>
+            <p class="vd-sr" aria-live="polite" data-vd-live>Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}</p>
+            <article class="vd-info card-p5" role="group" aria-roledescription="slide" aria-label="Proyecto ${this.currentIndex + 1} de ${this.projects.length}: ${this.escape(project.title)}">
+              ${this.infoHTML(project, this.currentIndex)}
+            </article>
+          </div>
+        </div>
+        <div class="vd-controls">
+          <div class="vd-arrows">
+            <button type="button" class="vd-arrow btn-p5" data-action="prev" aria-label="Proyecto anterior"><span>←</span></button>
+            <button type="button" class="vd-arrow btn-p3" data-action="next" aria-label="Proyecto siguiente"><span>→</span></button>
+          </div>
+          <ul class="vd-dots" aria-label="Elegir proyecto">
+            ${this.projects.map((p, i) => `
+              <li><button type="button" class="vd-dot" data-index="${i}" aria-label="Ir al proyecto ${i + 1}: ${this.escape(p.title)}"${i === this.currentIndex ? ' aria-current="true"' : ''}></button></li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+    this.infoEl = this.container.querySelector('.vd-info');
+    this.countEl = this.container.querySelector('.vd-count');
+    this.dotsEl = this.container.querySelector('.vd-dots');
+    this.liveEl = this.container.querySelector('[data-vd-live]');
+    this.slots = Array.from(this.container.querySelectorAll('.vd-slot'));
+    this.container.querySelector('[data-action="prev"]')?.addEventListener('click', () => this.navigate(-1));
+    this.container.querySelector('[data-action="next"]')?.addEventListener('click', () => this.navigate(1));
+    this.dotsEl?.querySelectorAll('.vd-dot').forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const i = Number((dot as HTMLElement).dataset.index || '0');
+        this.goTo(i);
+      });
+    });
+    const root = this.container.querySelector('.vd-carousel');
+    root?.addEventListener('keydown', this.onKeyDown as EventListener);
+    root?.addEventListener('pointerdown', this.onPointerDown as EventListener);
+    root?.addEventListener('pointerup', this.onPointerUp as EventListener);
+    this.updateSlots();
   }
 
-  private snapToNearest() {
-    const itemAngle = Math.PI * 2 / 3; // 3 items visible
-    const snapped = Math.round(this.targetRotation / itemAngle) * itemAngle;
-    this.targetRotation = snapped;
-    this.startAnimation();
+  private offsetFor(slotIndex: number): number {
+    const total = this.projects.length;
+    let offset = (slotIndex - this.currentIndex) % total;
+    if (offset > total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
+    return offset;
   }
 
-  private startAnimation() {
-    if (this.animationId) return;
-    this.animate();
-  }
-
-  private animate() {
-    if (!this.isDragging) {
-      this.rotation += (this.targetRotation - this.rotation) * 0.08;
-      this.updateDiscPositions();
-    }
-    this.animationId = requestAnimationFrame(() => this.animate());
-  }
-
-  private updateDiscPositions() {
-    const visibleCount = Math.min(3, this.projects.length);
-    const half = Math.floor(visibleCount / 2);
-    
-    this.discElements.forEach((disc, index) => {
-      let relativeIndex = index - this.currentIndex;
-      
-      // Wrap around for circular carousel
-      while (relativeIndex > half) relativeIndex -= this.projects.length;
-      while (relativeIndex < -half) relativeIndex += this.projects.length;
-      
-      const targetPos = this.getPositionForIndex(relativeIndex);
-      const currentTransform = disc.style.transform;
-      
-      // Smooth interpolation
-      const currentX = this.extractTranslateX(currentTransform);
-      const currentZ = this.extractTranslateZ(currentTransform);
-      const currentScale = this.extractScale(currentTransform);
-      
-      const newX = currentX + (targetPos.x - currentX) * 0.15;
-      const newZ = currentZ + (targetPos.z - currentZ) * 0.15;
-      const newScale = currentScale + (targetPos.scale - currentScale) * 0.15;
-      const newOpacity = currentTransform.includes('opacity') ? 
-        parseFloat(currentTransform.match(/opacity:\s*([\d.]+)/)?.[1] || '1') + (targetPos.opacity - parseFloat(currentTransform.match(/opacity:\s*([\d.]+)/)?.[1] || '1')) * 0.15
-        : targetPos.opacity;
-
-      disc.style.transform = `translateX(${newX}px) translateZ(${newZ}px) scale(${newScale})`;
-      disc.style.opacity = String(targetPos.opacity);
-      disc.style.zIndex = String(targetPos.zIndex);
-      disc.setAttribute('aria-selected', relativeIndex === 0 ? 'true' : 'false');
+  private updateSlots(): void {
+    this.slots.forEach((slot, i) => {
+      const offset = this.offsetFor(i);
+      const t = this.slotTransform(offset);
+      slot.style.transform = t.css;
+      slot.style.opacity = t.opacity;
+      slot.style.zIndex = t.z;
+      slot.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+      slot.style.visibility = t.opacity === '0' ? 'hidden' : 'visible';
+      if (offset === 0) slot.classList.add('is-on');
+      else slot.classList.remove('is-on');
     });
   }
 
-  private getPositionForIndex(relativeIndex: number): { x: number; z: number; scale: number; opacity: number; zIndex: number } {
-    if (relativeIndex === 0) {
-      return { x: 0, z: 0, scale: 1, opacity: 1, zIndex: 10 };
-    } else if (relativeIndex === -1) {
-      return { x: -320, z: -150, scale: 0.65, opacity: 0.5, zIndex: 9 };
-    } else if (relativeIndex === 1) {
-      return { x: 320, z: -150, scale: 0.65, opacity: 0.5, zIndex: 9 };
+  private navigate(direction: number): void {
+    const total = this.projects.length;
+    if (total <= 1) return;
+    this.goTo((this.currentIndex + direction + total) % total);
+  }
+
+  private goTo(index: number): void {
+    if (index === this.currentIndex || index < 0 || index >= this.projects.length) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const hadFocus = !!this.infoEl?.contains(document.activeElement);
+    this.currentIndex = index;
+    const project = this.projects[index];
+    if (this.countEl) {
+      this.countEl.innerHTML = `${this.pad(index + 1)}<span class="vd-total">/${this.pad(this.projects.length)}</span>`;
     }
-    return { x: 0, z: -300, scale: 0.3, opacity: 0, zIndex: 1 };
-  }
-
-  private extractTranslateX(transform: string): number {
-    const match = transform.match(/translateX\(([-\d.]+)px\)/);
-    return match ? parseFloat(match[1]) : 0;
-  }
-
-  private extractTranslateZ(transform: string): number {
-    const match = transform.match(/translateZ\(([-\d.]+)px\)/);
-    return match ? parseFloat(match[1]) : 0;
-  }
-
-  private extractScale(transform: string): number {
-    const match = transform.match(/scale\(([\d.]+)\)/);
-    return match ? parseFloat(match[1]) : 1;
-  }
-
-  private navigate(direction: number) {
-    const newIndex = (this.currentIndex + direction + this.projects.length) % this.projects.length;
-    this.goTo(newIndex);
-  }
-
-  private goTo(index: number) {
-    if (this.isAnimating || index === this.currentIndex) return;
-    
-    this.isAnimating = true;
-    this.cancelAnimation();
-    
-    const direction = index > this.currentIndex ? 1 : -1;
-    const distance = Math.abs(index - this.currentIndex);
-    const shortest = Math.min(distance, this.projects.length - distance);
-    const actualDirection = (index - this.currentIndex + this.projects.length) % this.projects.length <= this.projects.length / 2 ? 1 : -1;
-    
-    // Animate rotation
-    this.gsap.to(this, {
-      targetRotation: this.targetRotation + (actualDirection * Math.PI * 2 / 3) * shortest,
-      duration: 0.8,
-      ease: 'power3.out',
-      onUpdate: () => this.updateDiscPositions(),
-      onComplete: () => {
-        this.currentIndex = index;
-        this.updateActiveStates();
-        this.isAnimating = false;
-        this.startAnimation();
+    const yearEl = this.container.querySelector('.vd-year');
+    if (yearEl) yearEl.textContent = project.year || '';
+    this.dotsEl?.querySelectorAll('.vd-dot').forEach((dot, i) => {
+      if (i === index) dot.setAttribute('aria-current', 'true');
+      else dot.removeAttribute('aria-current');
+    });
+    if (this.liveEl) {
+      this.liveEl.textContent = `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}`;
+    }
+    this.updateSlots();
+    playDisc(index);
+    if (!this.infoEl) return;
+    this.infoEl.setAttribute('aria-label', `Proyecto ${index + 1} de ${this.projects.length}: ${project.title}`);
+    const swap = (): void => {
+      if (!this.infoEl) return;
+      this.infoEl.innerHTML = this.infoHTML(project, index);
+      this.infoEl.classList.remove('swap');
+      if (hadFocus) {
+        this.infoEl.querySelector('.vd-title')?.focus({ preventScroll: true } as FocusOptions);
       }
-    });
-
-    // Update info panel
-    this.gsap.to('.info-item.active', {
-      opacity: 0,
-      y: -20,
-      duration: 0.3,
-      ease: 'power2.in',
-      onComplete: () => {
-        document.querySelectorAll('.info-item').forEach(el => {
-          el.classList.remove('active');
-          (el as HTMLElement).style.display = 'none';
-        });
-        const newActive = this.container.querySelector(`.info-item[data-index="${index}"]`);
-        if (newActive) {
-          (newActive as HTMLElement).style.display = 'block';
-          newActive.classList.add('active');
-          this.gsap.from(newActive, {
-            opacity: 0,
-            y: 20,
-            duration: 0.5,
-            ease: 'power3.out'
-          });
-        }
-      }
-    });
-
-    // Update indicators
-    this.container.querySelectorAll('.indicator').forEach((ind, i) => {
-      ind.classList.toggle('bg-p5-gold', i === index);
-      ind.classList.toggle('w-8', i === index);
-      ind.classList.toggle('bg-p5-red-dim/50', i !== index);
-      ind.classList.toggle('w-2.5', i !== index);
-      ind.setAttribute('aria-selected', i === index ? 'true' : 'false');
-    });
-
-    // Update nav buttons
-    const prevBtn = this.container.querySelector('.prev-btn') as HTMLButtonElement;
-    const nextBtn = this.container.querySelector('.next-btn') as HTMLButtonElement;
-    if (prevBtn) prevBtn.disabled = this.projects.length <= 1;
-    if (nextBtn) nextBtn.disabled = this.projects.length <= 1;
+    };
+    if (reduced) {
+      swap();
+      return;
+    }
+    this.infoEl.classList.add('swap');
+    if (this.swapTimeout !== undefined) clearTimeout(this.swapTimeout);
+    this.swapTimeout = window.setTimeout(swap, 160);
   }
 
-  private updateActiveStates() {
-    this.discElements.forEach((disc, index) => {
-      disc.setAttribute('aria-selected', index === this.currentIndex ? 'true' : 'false');
-    });
-  }
-
-  private setupGSAP() {
-    // Initial entrance animation
-    this.gsap.from('.disc-card', {
-      opacity: 0,
-      y: 50,
-      rotationY: (i: number) => (i - 1) * 45,
-      scale: 0.5,
-      duration: 1.2,
-      ease: 'power3.out',
-      stagger: 0.15,
-    });
-
-    this.gsap.from('.disc-info-panel', {
-      opacity: 0,
-      y: 50,
-      duration: 1,
-      delay: 0.5,
-      ease: 'power3.out',
-    });
-
-    this.gsap.from('.nav-btn', {
-      opacity: 0,
-      x: (i: number) => i === 0 ? -30 : 30,
-      duration: 0.6,
-      delay: 0.8,
-      ease: 'power3.out',
-      stagger: 0.1,
-    });
-
-    this.gsap.from('.indicator', {
-      opacity: 0,
-      scale: 0,
-      duration: 0.5,
-      delay: 0.8,
-      ease: 'back.out(1.7)',
-      stagger: 0.05,
-    });
-  }
-
-  destroy() {
-    this.cancelAnimation();
-    window.removeEventListener('keydown', this.onKeyDown.bind(this));
-    this.discRenderer.clearCache();
+  destroy(): void {
+    stopAll();
+    if (this.swapTimeout !== undefined) {
+      clearTimeout(this.swapTimeout);
+      this.swapTimeout = undefined;
+    }
+    const root = this.container.querySelector('.vd-carousel');
+    root?.removeEventListener('keydown', this.onKeyDown as EventListener);
+    root?.removeEventListener('pointerdown', this.onPointerDown as EventListener);
+    root?.removeEventListener('pointerup', this.onPointerUp as EventListener);
   }
 }

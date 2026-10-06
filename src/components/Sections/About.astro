@@ -3,58 +3,51 @@ interface Props {
   profile: any;
 }
 const { profile } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <section id="about" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="about-title" style="scroll-margin-top: var(--header-h);">
   <div class="max-w-7xl mx-auto">
     <h2 id="about-title" class="section-title text-center">
-      Sobre <span>mí</span>
+      Sobre <span>mi</span>
     </h2>
     
     <div class="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
       <div class="relative">
-        <div class="relative aspect-square max-w-xs mx-auto">
+        <div class="relative aspect-square max-w-xs mx-auto bg-fusion-card rounded-2xl overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-br from-p5-red/20 to-p3-blue/10 rounded-2xl blur-2xl opacity-50 animate-float-slow"></div>
-          <img src="/assets/images/yopro.jpeg" alt="Fotografía de Carlos de Jesus Martinez Pineda" class="relative w-full h-full object-cover rounded-2xl border-2 border-p5-red-dim/50 hover:border-fusion-accent-primary/50 transition-all duration-500">
+          <img src={`${base}assets/images/yolanding.webp`} alt="Fotografía de Carlos de Jesús Martínez Pineda" class="relative block w-full h-full object-cover rounded-2xl border-2 border-p5-red-dim/50 hover:border-fusion-accent-primary/50 transition-all duration-500" loading="lazy" decoding="async" width="400" height="400" onerror={`if(this.dataset.fb==='1'){this.onerror=null;this.src='${base}assets/images/yopro.jpeg';}else{this.dataset.fb='1';this.src='${base}assets/images/yolanding.jpg';}`} />
         </div>
       </div>
       
       <div class="space-y-6">
         <p class="text-fusion-text-muted text-lg leading-relaxed">
-          Soy <strong class="text-fusion-text-primary">{profile.name}</strong>, estudiante de <strong class="text-fusion-highlight">{profile.title}</strong> en {profile.location}. Mi enfoque principal es el desarrollo <strong class="text-fusion-accent-primary">Full Stack</strong> con énfasis en rendimiento, escalabilidad y experiencia de usuario.
-        </p>
-        
-        <p class="text-fusion-text-muted text-lg leading-relaxed">
-          Me apasiona escribir <strong class="text-fusion-text-primary">código limpio</strong>, aplicar <strong class="text-fusion-text-primary">patrones de arquitectura</strong> y optimizar <strong class="text-fusion-text-primary">Core Web Vitals</strong>. Tengo experiencia con tecnologías modernas de frontend y backend, bases de datos relacionales y no relacionales, y metodologías ágiles.
+          Soy Carlos Martínez, estudio Ingeniería en Software en Chiapas. Hago landings con HTML, CSS y JavaScript, y herramientas en Python. Busco trabajo remoto o prácticas.
         </p>
         
         <div class="grid grid-cols-2 gap-4 pt-4">
           <div class="flex items-center gap-3 p-4 bg-fusion-card border border-p5-red-dim/30 rounded-xl hover:border-fusion-accent-primary/50 transition-all">
-            <span class="text-fusion-highlight text-2xl">📍</span>
             <div>
               <p class="font-display text-xs text-fusion-accent-primary uppercase">Ubicación</p>
-              <p class="text-fusion-text-muted text-sm">{profile.location}</p>
+              <p class="text-fusion-text-muted text-sm">Chiapas, México</p>
             </div>
           </div>
           <div class="flex items-center gap-3 p-4 bg-fusion-card border border-p5-red-dim/30 rounded-xl hover:border-fusion-accent-primary/50 transition-all">
-            <span class="text-fusion-highlight text-2xl">📧</span>
             <div>
               <p class="font-display text-xs text-fusion-accent-primary uppercase">Email</p>
-              <a href="mailto:{profile.email}" class="text-fusion-text-muted text-sm hover:text-fusion-highlight transition-colors">{profile.email}</a>
+              <a href={`mailto:${profile.email}`} class="text-fusion-text-muted text-sm hover:text-fusion-highlight transition-colors">{profile.email}</a>
             </div>
           </div>
           <div class="flex items-center gap-3 p-4 bg-fusion-card border border-p5-red-dim/30 rounded-xl hover:border-fusion-accent-primary/50 transition-all">
-            <span class="text-fusion-highlight text-2xl">🎓</span>
             <div>
               <p class="font-display text-xs text-fusion-accent-primary uppercase">Formación</p>
-              <p class="text-fusion-text-muted text-sm">{profile.stats.education}</p>
+              <p class="text-fusion-text-muted text-sm">Ingeniería en Software</p>
             </div>
           </div>
           <div class="flex items-center gap-3 p-4 bg-fusion-card border border-p5-red-dim/30 rounded-xl hover:border-fusion-accent-primary/50 transition-all">
-            <span class="text-fusion-highlight text-2xl">💡</span>
             <div>
               <p class="font-display text-xs text-fusion-accent-primary uppercase">Enfoque</p>
-              <p class="text-fusion-text-muted text-sm">{profile.stats.focus}</p>
+              <p class="text-fusion-text-muted text-sm">Landings y Python</p>
             </div>
           </div>
         </div>

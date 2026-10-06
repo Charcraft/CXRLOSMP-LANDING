@@ -1,13 +1,13 @@
 const MENU_ITEMS = [
-  { id: 'skill', label: 'SKILL', target: '#skills', icon: '🎯', p3Name: 'Skill', sound: 'navigate' },
-  { id: 'item', label: 'ITEM', target: '#projects', icon: '💿', p3Name: 'Item', sound: 'navigate' },
-  { id: 'equip', label: 'EQUIP', target: '#experience', icon: '⚙️', p3Name: 'Equip', sound: 'navigate' },
-  { id: 'persona', label: 'PERSONA', target: '#about', icon: '👤', p3Name: 'Persona', sound: 'navigate' },
-  { id: 'stats', label: 'STATS', target: '#stats', icon: '📊', p3Name: 'Stats', sound: 'navigate' },
-  { id: 'quest', label: 'QUEST', target: '#quests', icon: '🏆', p3Name: 'Quest', sound: 'navigate' },
-  { id: 'social', label: 'SOCIAL LINK', target: '#contact', icon: '🔗', p3Name: 'Social Link', sound: 'navigate' },
-  { id: 'calendar', label: 'CALENDAR', target: '#timeline', icon: '📅', p3Name: 'Calendar', sound: 'navigate' },
-  { id: 'system', label: 'SYSTEM', target: '#settings', icon: '⚙️', p3Name: 'System', sound: 'navigate' },
+  { id: 'skill', label: 'SKILL', target: '#skills', icon: '', p3Name: 'Skill', sound: 'navigate' },
+  { id: 'item', label: 'ITEM', target: '#projects', icon: '', p3Name: 'Item', sound: 'navigate' },
+  { id: 'equip', label: 'EQUIP', target: '#experience', icon: '', p3Name: 'Equip', sound: 'navigate' },
+  { id: 'persona', label: 'PERSONA', target: '#about', icon: '', p3Name: 'Persona', sound: 'navigate' },
+  { id: 'stats', label: 'STATS', target: '#stats', icon: '', p3Name: 'Stats', sound: 'navigate' },
+  { id: 'quest', label: 'QUEST', target: '#quests', icon: '', p3Name: 'Quest', sound: 'navigate' },
+  { id: 'social', label: 'SOCIAL LINK', target: '#contact', icon: '', p3Name: 'Social Link', sound: 'navigate' },
+  { id: 'calendar', label: 'CALENDAR', target: '#timeline', icon: '', p3Name: 'Calendar', sound: 'navigate' },
+  { id: 'system', label: 'SYSTEM', target: '#settings', icon: '', p3Name: 'System', sound: 'navigate' },
 ];
 
 export class P3Menu {
@@ -27,6 +27,9 @@ export class P3Menu {
   }
 
   private init() {
+    // Inerte: el dueno unico del menu movil es main.ts (.nav-toggle + #nav-menu).
+    // No renderiza segundo menu, ni listeners globales, ni sonidos.
+    if (typeof document !== 'undefined' && document.querySelector('#nav-menu')) return;
     this.render();
     this.cacheElements();
     this.bindEvents();
@@ -338,7 +341,7 @@ export class P3Menu {
     }
   }
 
-  private playSound(type: 'navigate' | 'confirm' | 'open' | 'close') {
+  private playSound(type: 'navigate' | 'confirm' | 'open' | 'close' | 'back') {
     if (this.audioManager) {
       this.audioManager.play(type);
     }
@@ -382,7 +385,7 @@ function createMenuItem(item: typeof MENU_ITEMS[0], index: number): string {
       </svg>
 
       <!-- Icon -->
-      <span class="menu-icon text-2xl md:text-3xl transition-transform duration-300 group-hover:scale-110" aria-hidden="true">${MENU_ITEMS.find(m => m.id === 'skill' || m.id === 'item' || m.id === 'equip' || m.id === 'persona' || m.id === 'stats' || m.id === 'quest' || m.id === 'social' || m.id === 'calendar' || m.id === 'system')?.icon || '🎯'}</span>
+      <span class="menu-icon text-2xl md:text-3xl transition-transform duration-300 group-hover:scale-110" aria-hidden="true">${MENU_ITEMS.find(m => m.id === 'skill' || m.id === 'item' || m.id === 'equip' || m.id === 'persona' || m.id === 'stats' || m.id === 'quest' || m.id === 'social' || m.id === 'calendar' || m.id === 'system')?.icon || ''}</span>
 
       <!-- Label -->
       <span class="menu-label font-display text-sm md:text-base uppercase tracking-wider text-fusion-text-muted group-hover:text-fusion-accent-primary transition-colors duration-300">

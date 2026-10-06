@@ -1,6 +1,22 @@
 ---
 import { getCollection } from 'astro:content';
-const experiences = await getCollection('experience');
+function parsePeriod(p: string): number {
+  const s = (p ?? '').trim().toLowerCase();
+  const months: Record<string, number> = {
+    enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6,
+    julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10, noviembre: 11, diciembre: 12,
+  };
+  const yearMatch = s.match(/(\d{4})/);
+  const year = yearMatch ? parseInt(yearMatch[1], 10) : 9999;
+  let month = 1;
+  for (const [name, num] of Object.entries(months)) {
+    if (s.includes(name)) { month = num; break; }
+  }
+  return year * 100 + month;
+}
+const experiences = (await getCollection('experience')).sort(
+  (a, b) => parsePeriod(a.data.period) - parsePeriod(b.data.period) || a.data.role.localeCompare(b.data.role)
+);
 ---
 
 <section id="experience" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="exp-title" style="scroll-margin-top: var(--header-h);">
@@ -10,26 +26,28 @@ const experiences = await getCollection('experience');
     </h2>
     
     <div class="timeline relative">
-      <div class="timeline-line absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-p5-red to-p3-blue"></div>
+      <div class="timeline-line absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-p5-red to-p3-blue" aria-hidden="true"></div>
       
-      {experiences.map((exp, index) => `
-        <article class="timeline-item relative mb-16 {index % 2 === 0 ? 'md:text-right md:pr-16' : 'md:pl-16 md:ml-auto md:w-1/2'}">
-          <div class="timeline-marker absolute top-4 {index % 2 === 0 ? 'right-[-12px] md:right-[-12px]' : 'left-[-12px] md:left-[-12px]'} w-4 h-4 rounded-full bg-fusion-bg border-3 border-fusion-highlight shadow-[0_0_20px_rgba(242,232,82,0.5)] z-10"></div>
+      {experiences.map((exp, index) => (
+        <article class={`timeline-item relative mb-16 ${index % 2 === 0 ? 'md:text-right md:pr-16' : 'md:pl-16 md:ml-auto md:w-1/2'}`}>
+          <div class={`timeline-marker absolute top-4 ${index % 2 === 0 ? 'right-[-12px] md:right-[-12px]' : 'left-[-12px] md:left-[-12px]'} w-4 h-4 rounded-full bg-fusion-bg border-2 border-fusion-highlight shadow-[0_0_20px_rgba(242,232,82,0.5)] z-10`} aria-hidden="true"></div>
           
-          <div class="timeline-content card-p5 p-6 relative">
+          <div class="timeline-content card-p5 p-6 relative" style="opacity:1;">
             <div class="flex items-center gap-3 mb-3">
-              <span class="badge-p5 text-xs">{exp.data.type === 'certification' ? '📜 Certificación' : exp.data.type === 'work' ? '💼 Experiencia' : '🏆 Evento'}</span>
+              <span class="badge-p5 text-xs">{exp.data.type === 'certification' ? 'Certificación' : exp.data.type === 'work' ? 'Experiencia' : 'Evento'}</span>
               <span class="font-display text-xs text-fusion-highlight">{exp.data.period}</span>
             </div>
-            <h3 class="font-display text-lg md:text-xl text-fusion-text-primary mb-2">{exp.data.role}</h3>
-            <p class="text-fusion-text-secondary font-medium mb-1">{exp.data.company}</p>
-            <p class="text-fusion-text-muted leading-relaxed">{exp.data.description}</p>
+            <h3 class="font-display text-lg md:text-xl text-fusion-text-primary mb-2" style="opacity:1;">{exp.data.role}</h3>
+            <p class="text-fusion-text-primary font-medium mb-1" style="opacity:1;">{exp.data.company}</p>
+            <p class="text-fusion-text-muted leading-relaxed" style="opacity:1;">{exp.data.description}</p>
           </div>
         </article>
-      `)}
+      ))}
     </div>
   </div>
 </section>
+
+
 
 <style>
   .timeline {
@@ -47,16 +65,18 @@ const experiences = await getCollection('experience');
 </style>
 
 <script>
-  // Scroll reveal for timeline items
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('animate-fade-slide-up');
-      }
-    });
-  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
-  document.querySelectorAll('#experience .timeline-item').forEach(item => {
-    observer.observe(item);
-  });
+  // Reveal seguro: el contenido ya es visible por HTML/CSS.
+  // Solo anade animacion al entrar en viewport, nunca oculta.
+  const items = document.querySelectorAll('#experience .timeline-item');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-slide-up');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    items.forEach(item => observer.observe(item));
+  }
 </script>

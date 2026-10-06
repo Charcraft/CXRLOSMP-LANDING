@@ -1,15 +1,21 @@
 ---
+import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Hero from '../components/Sections/Hero.astro';
 import About from '../components/Sections/About.astro';
 import Skills from '../components/Sections/Skills.astro';
 import Experience from '../components/Sections/Experience.astro';
+import AISection from '../components/Sections/AISection.astro';
 import Contact from '../components/Sections/Contact.astro';
 import Stats from '../components/Sections/Stats.astro';
 
 const profile = (await import('../content/profile.json')).default;
 const skills = (await import('../content/profile.json')).default.skills;
 const projects = await getCollection('projects');
+
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const siteUrl = 'https://charcraft.github.io/CXRLOSMP-LANDING';
+const firstName = profile?.name?.split(' ')?.[0] ?? 'Carlos';
 ---
 
 <!DOCTYPE html>
@@ -18,100 +24,152 @@ const projects = await getCollection('projects');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0D0D0D">
-  <meta name="description" content="Carlos de Jesus Martinez Pineda - Estudiante Ingeniería en Software | Build. Scale. Optimize.">
+  <meta name="description" content="Carlos Martínez — construyo webs rápidas que convierten. Landings y apps en Python.">
   <meta name="keywords" content="Software Engineering, Developer, Portfolio, Full Stack, JavaScript, Python, Java, C++">
-  <meta name="author" content="Carlos de Jesus Martinez Pineda">
-  
+  <meta name="author" content="Carlos de Jesús Martínez Pineda">
+
+  <link rel="canonical" href={siteUrl} />
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Carlos de Jesus Martinez Pineda | Software Engineering Student">
-  <meta property="og:description" content="Build. Scale. Optimize. - Portfolio de Carlos de Jesus Martinez Pineda">
-  <meta property="og:image" content="/assets/images/yopro.jpeg">
-  <meta property="og:url" content="https://charcraft.github.io/CXRLOSMP-LANDING/">
-  
+  <meta property="og:title" content="Carlos de Jesús Martínez Pineda | Software Engineering Student">
+  <meta property="og:description" content="Construyo webs rápidas que convierten — portfolio de Carlos Martínez.">
+  <meta property="og:image" content={`${siteUrl}/assets/images/yolanding.jpg`}>
+  <meta property="og:url" content={siteUrl}>
+
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Carlos de Jesus Martinez Pineda | Software Engineering Student">
-  <meta name="twitter:description" content="Build. Scale. Optimize.">
-  <meta name="twitter:image" content="/assets/images/yopro.jpeg">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/pressstart2p/v15/e3t4euO8T-267oIAQAu6jDQyK3nVivM.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/notosansjp/v19/zYXgKvElMYYaJe8bpLHnCwDKjQ.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/jetbrainsmono/v19/tDbD2oWUg0MKZDbi2BQ6PCVYTk5h6g.woff2">
-  
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/letra-c.png">
-  <link rel="apple-touch-icon" href="/assets/images/letra-c.png">
-  <link rel="manifest" href="/manifest.json">
-  
-  <title>Carlos de Jesus Martinez Pineda | Ingeniería en Software</title>
+  <meta name="twitter:title" content="Carlos de Jesús Martínez Pineda | Software Engineering Student">
+  <meta name="twitter:description" content="Construyo webs rápidas que convierten.">
+  <meta name="twitter:image" content={`${siteUrl}/assets/images/yolanding.jpg`}>
+
+  <link rel="icon" type="image/png" sizes="32x32" href={`${base}assets/images/letra-c.png`}>
+  <link rel="apple-touch-icon" href={`${base}assets/images/letra-c.png`}>
+  <link rel="manifest" href={`${base}manifest.json`}>
+  <link rel="preload" href={`${base}fonts/PressStart2P-Regular.ttf`} as="font" type="font/ttf" crossorigin>
+
+  <title>Carlos de Jesús Martínez Pineda | Ingeniería en Software</title>
+  <style>
+    #nav-menu { transform: translateX(100%); visibility: hidden; pointer-events: none; }
+    #nav-menu.nav-menu.open { transform: translateX(0); visibility: visible; pointer-events: auto; }
+    #nav-menu.nav-menu.open .nav-links { display: flex; flex-direction: column; visibility: visible; opacity: 1; pointer-events: auto; }
+    @media (min-width: 1024px) {
+      #nav-menu, #nav-menu.nav-menu.open { position: static; transform: none; translate: none; visibility: visible; opacity: 1; pointer-events: auto; width: auto; height: auto; background: transparent; border: none; overflow: visible; }
+    }
+  </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Saltar al contenido</a>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
-  
+
   <div id="p3-menu-container"></div>
-  
+
   <header class="fixed top-0 left-0 right-0 z-50 bg-fusion-bg/80 backdrop-blur-xl border-b border-p5-red-dim/30" role="banner" style="height: var(--header-h);">
-    <nav class="nav-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" aria-label="Navegación principal" style="height: var(--header-h);">
-      <a href="#hero" class="logo flex items-center gap-2" aria-label="Ir al inicio">
-        <img src="/assets/images/letra-c.png" alt="" class="logo-img w-8 h-8 md:w-10 md:h-10" width="40" height="40">
+    <div class="nav-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="height: var(--header-h);">
+      <a href="#hero" class="logo flex items-center gap-2 shrink-0" aria-label="Ir al inicio">
+        <img src={`${base}assets/images/letra-c.png`} alt="" class="logo-img w-8 h-8 md:w-10 md:h-10" width="40" height="40" decoding="async" fetchpriority="high">
         <span class="hidden md:inline font-display text-sm md:text-base text-fusion-highlight">CXRLOSMP</span>
       </a>
-      
-      <button class="nav-toggle md:hidden flex flex-col items-center justify-center gap-1.5 w-10 h-10 p-0 bg-transparent border border-p5-red-dim rounded text-fusion-accent-primary" 
-              type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="p3-menu">
-        <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
-        <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
-        <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
-      </button>
-    </nav>
+
+      <nav class="nav-menu lg:flex lg:items-center lg:justify-end" id="nav-menu" aria-label="Menú de secciones">
+        <ul class="nav-links flex flex-col lg:flex-row lg:items-center lg:flex-nowrap lg:whitespace-nowrap gap-1 lg:gap-2 px-6 py-8 lg:px-0 lg:py-0">
+          <li><a href="#hero" class="nav-link">Inicio</a></li>
+          <li><a href="#about" class="nav-link">Sobre mí</a></li>
+          <li><a href="#skills" class="nav-link">Skills</a></li>
+          <li><a href="#projects" class="nav-link">Proyectos</a></li>
+          <li><a href="#experience" class="nav-link">Experiencia</a></li>
+          <li><a href="#stats" class="nav-link">Stats</a></li>
+          <li><a href="#contact" class="nav-link">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="sound-toggle" type="button" class="sound-toggle" aria-pressed="true" aria-label="Desactivar sonidos de interfaz">
+          <span aria-hidden="true" class="sound-toggle-icon">S</span><span data-sound-label>ON</span>
+        </button>
+        <button class="nav-toggle lg:hidden flex flex-col items-center justify-center gap-1.5 w-10 h-10 p-0 bg-transparent border border-p5-red-dim rounded text-fusion-accent-primary shrink-0"
+                type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-menu">
+          <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
+          <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
+          <span class="nav-toggle-bar w-5 h-0.5 bg-fusion-accent-primary transition-all duration-300"></span>
+        </button>
+      </div>
+    </div>
   </header>
-  
-  <nav class="nav-menu hidden md:block fixed top-0 right-0 bottom-0 z-50 w-80 bg-fusion-bg/98 backdrop-blur-xl border-l border-p5-red-dim transform translate-x-full transition-transform duration-500 ease-out md:translate-x-0 md:static md:h-auto md:w-auto md:bg-transparent md:border-none md:flex md:items-center md:justify-end" id="nav-menu" aria-label="Menú de secciones" style="top: var(--header-h);">
-    <ul class="nav-links flex flex-col md:flex-row md:items-center gap-1 md:gap-4 px-6 py-8 md:px-0 md:py-0">
-      <li><a href="#hero" class="nav-link">Inicio</a></li>
-      <li><a href="#about" class="nav-link">Sobre mí</a></li>
-      <li><a href="#skills" class="nav-link">Skills</a></li>
-      <li><a href="#projects" class="nav-link">Proyectos</a></li>
-      <li><a href="#experience" class="nav-link">Experiencia</a></li>
-      <li><a href="#stats" class="nav-link">Stats</a></li>
-      <li><a href="#contact" class="nav-link">Contacto</a></li>
-    </ul>
-  </nav>
-  
-  <div class="nav-overlay hidden md:hidden fixed inset-0 bg-fusion-bg/60 z-40 opacity-0 transition-opacity duration-300" id="nav-overlay" hidden style="top: var(--header-h);"></div>
-  
-  <main>
+
+  <div class="nav-overlay fixed inset-0 bg-fusion-bg/60 z-40 opacity-0 transition-opacity duration-300" id="nav-overlay" hidden style="top: var(--header-h);"></div>
+
+  <main id="main">
     <Hero profile={profile} />
     <About profile={profile} />
     <Skills skills={skills} />
-    
+
     <section id="projects" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="projects-title" style="scroll-margin-top: var(--header-h);">
       <div class="max-w-7xl mx-auto">
         <h2 id="projects-title" class="section-title text-center">
           Proyectos <span>Destacados</span>
         </h2>
-        
-        <div id="disc-carousel" class="w-full"></div>
+
+        <div class="flex justify-center mb-6">
+          <button id="disc-music-toggle" type="button" class="btn-p5" aria-pressed="true">
+            <span data-disc-music-label>Musica ON</span>
+          </button>
+        </div>
+
+        <div id="disc-carousel" class="w-full">
+          <div class="projects-fallback grid md:grid-cols-2 gap-6">
+            <article class="card-p5 p-6">
+              <p class="badge-p5 text-xs mb-3">2026</p>
+              <h3 class="font-display text-xl text-fusion-text-primary mb-2">BotPublicador IA</h3>
+              <p class="text-fusion-text-muted mb-4">App en Streamlit con 6 bots sociales y publicación real en página de Facebook.</p>
+              <p class="text-fusion-text-muted text-sm mb-4">Python · Streamlit · Ollama · Facebook Graph API</p>
+            </article>
+            <article class="card-p5 p-6">
+              <p class="badge-p5 text-xs mb-3">2026</p>
+              <h3 class="font-display text-xl text-fusion-text-primary mb-2">LandingPageAct</h3>
+              <p class="text-fusion-text-muted mb-4">Landing page activa en HTML, CSS y JavaScript, actualizada en octubre de 2026.</p>
+              <p class="text-fusion-text-muted text-sm mb-4">HTML5 · CSS3 · JavaScript</p>
+              <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/LandingPageAct" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
+            </article>
+            <article class="card-p5 p-6">
+              <p class="badge-p5 text-xs mb-3">2025</p>
+              <h3 class="font-display text-xl text-fusion-text-primary mb-2">App Distribuciones de Probabilidad</h3>
+              <p class="text-fusion-text-muted mb-4">Herramienta en Python para calcular distribuciones de probabilidad y prueba de hipótesis sin tablas manuales.</p>
+              <p class="text-fusion-text-muted text-sm mb-4">Python</p>
+              <p><a class="text-fusion-highlight text-sm" href="https://github.com/Charcraft/DPPHapp" target="_blank" rel="noopener noreferrer">CÓDIGO</a></p>
+            </article>
+            <article class="card-p5 p-6">
+              <p class="badge-p5 text-xs mb-3">2025</p>
+              <h3 class="font-display text-xl text-fusion-text-primary mb-2">Consejo de Enfermeria</h3>
+              <p class="text-fusion-text-muted mb-4">Sitio estático en HTML con información y orientación de enfermería.</p>
+              <p class="text-fusion-text-muted text-sm mb-4">HTML</p>
+            </article>
+            <article class="card-p5 p-6 md:col-span-2">
+              <p class="badge-p5 text-xs mb-3">2025</p>
+              <h3 class="font-display text-xl text-fusion-text-primary mb-2">decoOne</h3>
+              <p class="text-fusion-text-muted mb-4">Proyecto integrador en JavaScript con interfaz web para catálogo decorativo.</p>
+              <p class="text-fusion-text-muted text-sm mb-4">JavaScript · HTML5 · CSS3</p>
+            </article>
+          </div>
+        </div>
       </div>
     </section>
-    
+
+    <AISection />
+
     <Experience />
     <Stats profile={profile} />
     <Contact profile={profile} />
   </main>
-  
+
   <footer class="py-8 px-4 border-t border-p5-red-dim/30" role="contentinfo">
     <div class="max-w-7xl mx-auto text-center">
       <p class="text-fusion-text-muted text-sm">
-        &copy; {new Date().getFullYear()} {profile.name}. 
-        Desarrollado con <span class="text-fusion-accent-primary">♥</span>, 
-        <span class="text-fusion-highlight">Three.js</span> y 
-        <span class="text-fusion-accent-tertiary">GSAP</span>.
+        &copy; {new Date().getFullYear()} Carlos de Jesús Martínez Pineda.
       </p>
     </div>
   </footer>
-  
-  <div id="p3-menu-container"></div>
+
+  <script>
+    import '../scripts/main.ts';
+  </script>
 </body>
 </html>

@@ -3,7 +3,7 @@ import mdx from '@astrojs/mdx';
 
 export default defineConfig({
   site: 'https://charcraft.github.io',
-  base: '/CXRLOSMP-BLOGDEV/',
+  base: '/CXRLOSMP-LANDING/',
   output: 'static',
   trailingSlash: 'never',
   build: {
@@ -14,5 +14,4 @@ export default defineConfig({
   markdown: {
     shikiConfig: { theme: 'github-dark' },
   },
-  prefetch: { prefetchAll: true },
 });

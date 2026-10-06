@@ -1,0 +1,104 @@
+---
+import real from '../../content/real.json';
+
+const aiWork = real.aiWork;
+const journey = real.agentJourney;
+const tools = real.tools;
+const formation = real.formation;
+
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const iconSrc = (icon: string) => `${base}assets/icons/${icon}`;
+---
+<section id="ai-formacion" class="py-20 md:py-32 px-4 sm:px-6 lg:px-8" aria-labelledby="ai-title" style="scroll-margin-top: var(--header-h);">
+  <div class="max-w-7xl mx-auto">
+    <h2 id="ai-title" class="section-title text-center">
+      En formación <span>con IA</span>
+    </h2>
+
+    <p class="max-w-3xl mx-auto text-center text-fusion-text-muted text-lg leading-relaxed mb-14">
+      Soy Carlos. Cuento lo que yo hice gracias a mis herramientas: construyo con IA,
+      depuro con agentes y publico de verdad.
+    </p>
+
+    <div class="max-w-5xl mx-auto vd-rule pt-10 mb-12">
+      <h3 class="font-display text-2xl md:text-3xl text-fusion-text-primary mb-5">Lo que ya construí</h3>
+      <p class="text-fusion-text-muted text-lg leading-relaxed mb-6 max-w-[68ch]">{aiWork.descripcion}</p>
+      <ul class="space-y-4 text-fusion-text-muted text-lg leading-relaxed list-none p-0 m-0 max-w-[68ch]">
+        {aiWork.hitos.map((hito) => (
+          <li class="vd-item">{hito}</li>
+        ))}
+      </ul>
+      <p class="text-fusion-text-muted text-sm mt-6 tracking-wide">{aiWork.stack.join(' · ')}</p>
+    </div>
+
+    <div class="max-w-5xl mx-auto vd-rule pt-10 mb-12">
+      <h3 class="font-display text-2xl md:text-3xl text-fusion-text-primary mb-5">Cómo trabajo con agentes</h3>
+      <p class="text-fusion-text-muted text-lg leading-relaxed mb-4 max-w-[68ch]">{journey.linea}</p>
+      <p class="text-fusion-text-muted leading-relaxed mb-4 max-w-[68ch]">{journey.contextoPersistente}</p>
+      <ul class="space-y-4 text-fusion-text-muted leading-relaxed list-none p-0 m-0 max-w-[68ch]">
+        {journey.debuggingReal.map((d) => (
+          <li class="vd-item">{d}</li>
+        ))}
+      </ul>
+      <p class="text-fusion-text-muted leading-relaxed mt-4 max-w-[68ch]">{journey.orquestadorActual}</p>
+    </div>
+
+    <div class="max-w-6xl mx-auto vd-rule pt-10 mb-12">
+      <h3 class="font-display text-2xl md:text-3xl text-fusion-text-primary mb-2 text-left">Herramientas</h3>
+      <p class="text-fusion-text-muted mb-8 max-w-[68ch]">Lo que uso cada semana para construir, con mi nivel en cada una.</p>
+      <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 list-none p-0 m-0" aria-label="Herramientas que uso">
+        {tools.map((tool) => (
+          <li class="vd-tool">
+            <img src={iconSrc(tool.icon)} alt="" width="28" height="28" loading="lazy" decoding="async" class="vd-tool-icon" />
+            <p class="text-fusion-text-primary font-medium leading-tight">{tool.name}</p>
+            <p class="text-fusion-text-muted text-sm capitalize">{tool.level}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="max-w-3xl mx-auto text-center vd-rule pt-10">
+      <p class="text-fusion-text-muted text-lg leading-relaxed">
+        Soy estudiante de primer año. Aprendo de todo en mi carrera: {formation.interests.join(', ')}.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .vd-rule { border-top: 1px solid rgba(236, 230, 216, 0.16); }
+  .vd-item {
+    position: relative;
+    padding-left: 1.75rem;
+  }
+  .vd-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 1.1rem;
+    height: 2px;
+    background: #c9a86a;
+  }
+  .vd-tool {
+    border: 1px solid rgba(236, 230, 216, 0.14);
+    background: rgba(236, 230, 216, 0.03);
+    padding: 1rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: flex-start;
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+  }
+  .vd-tool:hover {
+    border-color: rgba(201, 168, 106, 0.6);
+    background: rgba(201, 168, 106, 0.07);
+  }
+  .vd-tool-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+  }
+</style>

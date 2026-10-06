@@ -1,8 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import './fonts.css';
+@import "tailwindcss/index.css";
+
+@config "../../tailwind.config.mjs";
 
 @layer base {
   :root {
@@ -50,6 +49,7 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -62,10 +62,21 @@
     @apply bg-fusion-bg text-fusion-text-primary font-ui;
     font-size: 16px;
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: clip;
     min-height: 100vh;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  @supports not (overflow: clip) {
+    html, body {
+      overflow-x: hidden;
+    }
   }
 
   ::selection {
@@ -141,14 +152,14 @@
   }
 
   .card-p5 {
-    @apply relative bg-fusion-card border border-fusion-card border-opacity-50 rounded-xl
+    @apply relative bg-fusion-card border border-fusion-card/50 rounded-xl
            overflow-hidden transition-all duration-500 ease-out
            hover:border-p5-red hover:shadow-[0_20px_40px_-12px_rgba(217,35,35,0.4)]
            hover:-translate-y-1;
   }
 
   .card-p3 {
-    @apply relative bg-fusion-card border border-fusion-card border-opacity-50 rounded-xl
+    @apply relative bg-fusion-card border border-fusion-card/50 rounded-xl
            overflow-hidden transition-all duration-500 ease-out
            hover:border-p3-blue hover:shadow-[0_20px_40px_-12px_rgba(0,180,255,0.4)]
            hover:-translate-y-1;
@@ -173,6 +184,7 @@
     @apply relative px-3 py-2 font-display text-xs uppercase tracking-wider
            text-fusion-text-muted transition-all duration-300 ease-out
            hover:text-fusion-accent-primary hover:-translate-y-0.5;
+    white-space: nowrap;
   }
 
   .nav-link::after {
@@ -184,6 +196,81 @@
   .nav-link:hover::after,
   .nav-link.active::after {
     @apply w-full;
+  }
+
+  .nav-link:focus-visible {
+    outline: 2px solid #00B4FF;
+    outline-offset: 2px;
+  }
+
+  .sound-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    font-family: inherit;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ece6d8;
+    background: transparent;
+    border: 1px solid rgba(236, 230, 216, 0.3);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+  }
+
+  .sound-toggle:hover {
+    border-color: #c9a86a;
+    background: rgba(201, 168, 106, 0.12);
+  }
+
+  .sound-toggle:focus-visible {
+    outline: 2px solid #ece6d8;
+    outline-offset: 2px;
+  }
+
+  .sound-toggle.is-off {
+    opacity: 0.55;
+  }
+
+  .sound-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    background: #00B4FF;
+    color: #0D0D0D;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    z-index: 10000;
+    border-radius: 0.25rem;
+  }
+
+  .skip-link:focus-visible,
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
   }
 
   .skill-tag {
@@ -208,7 +295,7 @@
     @apply relative w-12 h-12 md:w-14 md:h-14 rounded-full
            bg-fusion-card border border-p5-red-dim
            flex items-center justify-center
-           text-fusion-text-muted transition-all duration-400 ease-out
+           text-fusion-text-muted transition-all duration-300 ease-out
            hover:border-fusion-accent-primary hover:bg-fusion-card hover:text-fusion-accent-tertiary
            hover:shadow-[0_0_30px_rgba(217,35,35,0.3)]
            hover:-translate-y-2 hover:scale-105
@@ -238,6 +325,7 @@
 
 @layer utilities {
   .text-gradient-fusion {
+    color: #FFF;
     @apply bg-gradient-to-r from-fusion-text-primary via-fusion-text-muted to-fusion-highlight
            bg-clip-text text-transparent;
     background-size: 200% 200%;
@@ -245,10 +333,19 @@
   }
 
   .text-gradient-fusion-reverse {
+    color: #FFF;
     @apply bg-gradient-to-r from-fusion-accent-tertiary via-fusion-accent-primary to-fusion-accent-secondary
            bg-clip-text text-transparent;
     background-size: 200% 200%;
     animation: gradientShift 4s ease-in-out infinite reverse;
+  }
+
+  @supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+    .text-gradient-fusion,
+    .text-gradient-fusion-reverse {
+      background: none !important;
+      color: #FFF !important;
+    }
   }
 
   .glass-p5 {
@@ -322,11 +419,59 @@
     opacity: 0;
   }
 
+  .animate-fade-slide-up-delay-1,
+  .animate-fade-slide-up-delay-2,
+  .animate-fade-slide-up-delay-3,
+  .animate-fade-slide-up-delay-4,
+  .animate-fade-slide-up-delay-5 {
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+
   .animate-fade-slide-up-delay-1 { animation-delay: 0.1s; }
   .animate-fade-slide-up-delay-2 { animation-delay: 0.2s; }
   .animate-fade-slide-up-delay-3 { animation-delay: 0.3s; }
   .animate-fade-slide-up-delay-4 { animation-delay: 0.4s; }
   .animate-fade-slide-up-delay-5 { animation-delay: 0.5s; }
+
+  /* Reveal por IntersectionObserver: funciona sin GSAP */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease-out, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Hero siempre legible: si JS falla o animacion no corre, mostrar a los 2.5s */
+  #hero .hero-sub,
+  #hero .hero-title,
+  #hero .hero-desc,
+  #hero .hero-cta-wrap {
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes heroSafetyIn {
+    to { opacity: 1; transform: none; }
+  }
+
+  #hero .hero-sub,
+  #hero .hero-title,
+  #hero .hero-desc,
+  #hero .hero-cta-wrap {
+    animation-name: fadeSlideUp, heroSafetyIn;
+    animation-duration: 0.8s, 0.01ms;
+    animation-delay: 0s, 2.5s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1), ease;
+    animation-fill-mode: forwards, forwards;
+  }
+
+  #hero .hero-title { animation-delay: 0.1s, 2.5s; }
+  #hero .hero-desc { animation-delay: 0.2s, 2.5s; }
+  #hero .hero-cta-wrap { animation-delay: 0.3s, 2.5s; }
 
   .reduce-motion .animate-fade-slide-up,
   .reduce-motion .animate-fade-slide-up-delay-1,
@@ -334,6 +479,11 @@
   .reduce-motion .animate-fade-slide-up-delay-3,
   .reduce-motion .animate-fade-slide-up-delay-4,
   .reduce-motion .animate-fade-slide-up-delay-5,
+  .reduce-motion .reveal,
+  .reduce-motion #hero .hero-sub,
+  .reduce-motion #hero .hero-title,
+  .reduce-motion #hero .hero-desc,
+  .reduce-motion #hero .hero-cta-wrap,
   .reduce-motion .animate-float-slow,
   .reduce-motion .animate-pulse-glow,
   .reduce-motion .animate-gradient-shift,
@@ -342,6 +492,144 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* Header / Nav: layout base */
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  /* Movil: menu lateral fuera de flujo para no empujar ancho en 390px */
+  #nav-menu {
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    bottom: 0;
+    width: min(78vw, 20rem);
+    max-width: 100%;
+    background: rgba(10, 10, 15, 0.98);
+    border-left: 1px solid rgba(217, 35, 35, 0.3);
+    z-index: 50;
+    overflow-y: auto;
+    transform: translateX(100%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.4s ease-out, visibility 0.4s;
+  }
+
+  #nav-menu.nav-menu.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  #nav-menu.nav-menu.open .nav-links {
+    display: flex;
+    flex-direction: column;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #nav-menu .nav-links {
+    list-style: none;
+  }
+
+  /* Desktop: links siempre visibles, sin depender de translate de Tailwind */
+  @media (min-width: 1024px) {
+    #nav-menu {
+      display: block !important;
+      position: static !important;
+      transform: none !important;
+      translate: none !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      width: auto !important;
+      height: auto !important;
+      background: transparent !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      top: auto !important;
+      flex-shrink: 1;
+      min-width: 0;
+      overflow: visible;
+    }
+
+    #nav-menu .nav-links {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      white-space: nowrap !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: 0.35rem !important;
+    }
+
+    #nav-menu .nav-link {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      font-size: 0.68rem !important;
+      letter-spacing: 0.06em !important;
+      white-space: nowrap !important;
+      flex-shrink: 0;
+    }
+
+    #nav-overlay {
+      display: none !important;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #nav-menu .nav-links {
+      gap: 0.5rem !important;
+    }
+
+    #nav-menu .nav-link {
+      padding-left: 0.6rem !important;
+      padding-right: 0.6rem !important;
+      font-size: 0.7rem !important;
+    }
+  }
+
+  /* Secciones bajas siempre visibles: sin JS, con JS o en captura completa */
+  #skills .skill-tag,
+  #experience .timeline-content,
+  #stats .stat-card,
+  #stats .card-p5,
+  #projects .card-p5 {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  #skills .skills-grid {
+    min-height: 80px;
+  }
+
+  /* Hero: fondo estatico legible + canvas como detalle */
+  #hero {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 40%, rgba(217, 35, 35, 0.08) 0%, transparent 70%),
+      linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 55%, #0a0a0f 100%);
+  }
+
+  #hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  #hero > div.relative.z-10 {
+    position: relative;
+    z-index: 10;
   }
 }
 
@@ -380,4 +668,181 @@
 @keyframes scanlines {
   0% { background-position: 0 0; }
   100% { background-position: 0 4px; }
+}
+
+/* Perf movil + responsive (2026-10-06): base sin animaciones infinitas
+   costosas. H1 solido en movil, gradiente animado solo en desktop. */
+.scanlines {
+  animation: none;
+  opacity: 0.25;
+}
+
+.grain-overlay {
+  animation: none;
+  opacity: 0.08;
+}
+
+#hero .hero-title,
+.text-gradient-fusion,
+.text-gradient-fusion-reverse {
+  animation: none;
+  background: none;
+  color: #FFF;
+}
+
+.animate-float-slow {
+  animation: none;
+}
+
+/* Header solido en movil: sin backdrop-blur (ahorra compositing) */
+header[role="banner"] {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(10, 10, 15, 0.96);
+}
+
+/* H1 fluido sin desborde: clamp + corte seguro de palabras largas */
+#hero .hero-title {
+  font-size: clamp(1.35rem, 8vw, 3.75rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* 360/390px: nav compacto que no se corta, CTAs sin desborde */
+@media (max-width: 390px) {
+  .nav-container {
+    gap: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  #hero .hero-title {
+    font-size: clamp(1.2rem, 7.5vw, 1.6rem);
+    letter-spacing: 0.02em;
+  }
+
+  #hero .hero-cta-wrap .btn-p5,
+  #hero .hero-cta-wrap .btn-p3 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  #about .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 768px+: restaura float decorativo y blur de header en desktop */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .animate-float-slow {
+    animation: floatSlow 8s ease-in-out infinite;
+  }
+
+  header[role="banner"] {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: rgba(10, 10, 15, 0.8);
+  }
+}
+
+/* 1024px+: gradiente H1 animado solo en desktop (6s, mas barato que 4s) */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  #hero .hero-title.text-gradient-fusion,
+  .text-gradient-fusion {
+    background-image: linear-gradient(to right, #FFFFFF, #A0A0B0, #F2E852);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 6s ease-in-out infinite;
+  }
+
+  .text-gradient-fusion-reverse {
+    background-image: linear-gradient(to right, #FF6B9D, #D92323, #00B4FF);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 6s ease-in-out infinite reverse;
+  }
+}
+
+/* 1440px+: tope de lectura en pantallas anchas */
+@media (min-width: 1440px) {
+  #hero .hero-title {
+    font-size: 3.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanlines,
+  .vignette,
+  .grain-overlay,
+  .animate-bounce,
+  .text-gradient-fusion,
+  .text-gradient-fusion-reverse {
+    animation: none !important;
+  }
+
+  .animate-fade-slide-up,
+  .animate-fade-slide-up-delay-1,
+  .animate-fade-slide-up-delay-2,
+  .animate-fade-slide-up-delay-3,
+  .animate-fade-slide-up-delay-4,
+  .animate-fade-slide-up-delay-5,
+  .reveal,
+  #hero .hero-sub,
+  #hero .hero-title,
+  #hero .hero-desc,
+  #hero .hero-cta-wrap {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  #hero-canvas {
+    display: none !important;
+  }
+}
+
+/* Fix hamburguesa 390px (sin capas: gana a cualquier @layer por cascada).
+   Cerrada: fuera a la derecha, oculta y sin puntero.
+   Abierta (ID + clases): visible y clicable. Desktop lg intacto. */
+#nav-menu {
+  transform: translateX(100%);
+  visibility: hidden;
+  pointer-events: none;
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
+  max-height: calc(100vh - var(--header-h));
+  max-height: calc(100dvh - var(--header-h));
+}
+#nav-menu.nav-menu.open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+#nav-menu.nav-menu.open .nav-links {
+  display: flex;
+  flex-direction: column;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (min-width: 1024px) {
+  #nav-menu,
+  #nav-menu.nav-menu.open {
+    position: static;
+    transform: none;
+    translate: none;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    overflow: visible;
+  }
 }
